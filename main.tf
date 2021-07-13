@@ -51,7 +51,7 @@ module "roamjs_lambda" {
   name = "base"
   lambdas = [
     { 
-      path = "base", 
+      path = "auth", 
       method = "post"
     },
   ]

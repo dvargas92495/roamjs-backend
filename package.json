@@ -21,6 +21,8 @@
   "dependencies": {
     "@blueprintjs/core": "^3.46.0",
     "@blueprintjs/select": "^3.16.5",
+    "aws-sdk": "^2.944.0",
+    "date-fns": "^2.22.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "roam-client": "^1.79.2",

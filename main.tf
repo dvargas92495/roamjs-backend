@@ -30,6 +30,14 @@ variable "github_token" {
   type = string
 }
 
+variable "stripe_public" {
+    type = string
+}
+
+variable "stripe_secret" {
+    type = string
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -54,9 +62,25 @@ module "roamjs_lambda" {
       path = "auth", 
       method = "post"
     },
+    {
+      path = "price",
+      method = "get"
+    }
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token
   github_token     = var.github_token
   developer_token  = var.developer_token
+}
+
+resource "github_actions_secret" "stripe_public" {
+  repository       = "roamjs-base"
+  secret_name      = "STRIPE_PUBLIC_KEY"
+  plaintext_value  = var.stripe_public
+}
+
+resource "github_actions_secret" "stripe_secret" {
+  repository       = "roamjs-base"
+  secret_name      = "STRIPE_SECRET_KEY"
+  plaintext_value  = var.stripe_secret
 }

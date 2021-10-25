@@ -89,7 +89,7 @@ resource "github_actions_secret" "stripe_secret" {
   plaintext_value  = var.stripe_secret
 }
 
-resource "github_actions_secret" "stripe_secret" {
+resource "github_actions_secret" "stripe_dev_secret" {
   repository       = "roamjs-base"
   secret_name      = "STRIPE_DEV_SECRET_KEY"
   plaintext_value  = var.stripe_dev_secret

@@ -7,10 +7,9 @@ const headers = {
 };
 
 export const handler = async (event: APIGatewayEvent) => {
-  const id = event.queryStringParameters?.id || "";
-  const isDev = !!event.headers["x-roamjs-dev"];
+  const { id = '', dev } = event.queryStringParameters || {};
   const stripe = new Stripe(
-    (isDev
+    (dev
       ? process.env.STRIPE_DEV_SECRET_KEY
       : process.env.STRIPE_SECRET_KEY) || "",
     {

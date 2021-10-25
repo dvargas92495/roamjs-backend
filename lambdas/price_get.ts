@@ -1,10 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2020-08-27",
-  maxNetworkRetries: 3,
-});
 const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
   "Access-Control-Allow-Methods": "POST",
@@ -12,6 +8,16 @@ const headers = {
 
 export const handler = async (event: APIGatewayEvent) => {
   const id = event.queryStringParameters?.id || "";
+  const isDev = !!event.headers["x-roamjs-dev"];
+  const stripe = new Stripe(
+    (isDev
+      ? process.env.STRIPE_DEV_SECRET_KEY
+      : process.env.STRIPE_SECRET_KEY) || "",
+    {
+      apiVersion: "2020-08-27",
+      maxNetworkRetries: 3,
+    }
+  );
   return stripe.prices
     .retrieve(id)
     .then((p) => ({

@@ -42,6 +42,14 @@ variable "stripe_dev_secret" {
     type = string
 }
 
+variable "clerk_api_key" {
+    type = string
+}
+
+variable "clerk_dev_api_key" {
+    type = string
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -69,6 +77,18 @@ module "roamjs_lambda" {
     {
       path = "price",
       method = "get"
+    },
+    {
+      path = "stripe-account",
+      method = "post"
+    },
+    {
+      path = "user",
+      method = "get"
+    },
+    {
+      path = "user",
+      method = "put"
     }
   ]
   aws_access_token = var.aws_access_token
@@ -93,4 +113,16 @@ resource "github_actions_secret" "stripe_dev_secret" {
   repository       = "roamjs-base"
   secret_name      = "STRIPE_DEV_SECRET_KEY"
   plaintext_value  = var.stripe_dev_secret
+}
+
+resource "github_actions_secret" "clerk_api_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CLERK_API_KEY"
+  plaintext_value  = var.clerk_api_key
+}
+
+resource "github_actions_secret" "clerk_dev_api_key" {
+  repository       = "roam-js-extensions"
+  secret_name      = "CLERK_DEV_API_KEY"
+  plaintext_value  = var.clerk_dev_api_key
 }

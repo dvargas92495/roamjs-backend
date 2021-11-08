@@ -116,13 +116,13 @@ resource "github_actions_secret" "stripe_dev_secret" {
 }
 
 resource "github_actions_secret" "clerk_api_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-base"
   secret_name      = "CLERK_API_KEY"
   plaintext_value  = var.clerk_api_key
 }
 
 resource "github_actions_secret" "clerk_dev_api_key" {
-  repository       = "roam-js-extensions"
+  repository       = "roamjs-base"
   secret_name      = "CLERK_DEV_API_KEY"
   plaintext_value  = var.clerk_dev_api_key
 }

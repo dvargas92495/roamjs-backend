@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
-import Stripe from "stripe";
+import {getStripe} from "./common";
 
 const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
@@ -8,14 +8,7 @@ const headers = {
 
 export const handler = async (event: APIGatewayEvent) => {
   const { id = '', dev } = event.queryStringParameters || {};
-  const stripe = new Stripe(
-    (dev
-      ? process.env.STRIPE_DEV_SECRET_KEY
-      : process.env.STRIPE_SECRET_KEY) || "",
-    {
-      apiVersion: "2020-08-27",
-    }
-  );
+  const stripe = getStripe(dev);
   return stripe.prices
     .retrieve(id)
     .then((p) => ({

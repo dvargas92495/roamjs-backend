@@ -21,6 +21,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.46.0",
     "@blueprintjs/select": "^3.16.5",
+    "@clerk/clerk-sdk-node": "^2.1.0",
     "aws-sdk": "^2.944.0",
     "date-fns": "^2.22.1",
     "react": "^17.0.2",

@@ -1,5 +1,5 @@
-import { setClerkApiKey, users } from "@clerk/clerk-sdk-node";
-import { authenticate, headers } from "./common";
+import { users } from "@clerk/clerk-sdk-node";
+import { authenticate, getUserFromEvent, headers } from "./common";
 
 const normalize = (hdrs: Record<string, string>) =>
   Object.fromEntries(
@@ -11,45 +11,39 @@ export const handler = authenticate(async (event) => {
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  if (dev) {
-    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
-  }
-  const userId = Buffer.from(token, "base64").toString().split(":")[0];
-  const { publicMetadata } = await users
-    .getUser(`user_${userId}`)
-    .catch(() => ({ publicMetadata: undefined }));
-  if (!publicMetadata) {
-    return {
-      statusCode: 401,
-      body: "Could not find user from the given token",
+  return getUserFromEvent(token, service, dev)
+    .then((user) => {
+      if (!user) {
+        return {
+          statusCode: 401,
+          body: "Invalid token",
+          headers,
+        };
+      }
+      const serviceData = user.publicMetadata[service] as Record<
+        string,
+        unknown
+      >;
+      return users
+        .updateUser(`user_${user.id}`, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            [service]: {
+              ...serviceData,
+              ...JSON.parse(event.body || "{}"),
+              token: serviceData.token,
+            },
+          },
+        })
+        .then(() => ({
+          statusCode: 200,
+          body: JSON.stringify({ succes: true }),
+          headers,
+        }));
+    })
+    .catch((e) => ({
+      statusCode: e.status || 500,
+      body: e.response.data || e.message,
       headers,
-    };
-  }
-  const { [service]: serviceData } = publicMetadata as Record<
-    string,
-    { token: string }
-  >;
-  const { token: storedToken } = serviceData;
-  if (!storedToken || token !== storedToken) {
-    return {
-      statusCode: 401,
-      body: "User is unauthorized to access your service",
-      headers,
-    };
-  }
-  await users.updateUser(`user_${userId}`, {
-    publicMetadata: {
-      ...publicMetadata,
-      [service]: {
-        ...serviceData,
-        ...JSON.parse(event.body || "{}"),
-        token: storedToken,
-      },
-    },
-  });
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ succes: true }),
-    headers,
-  };
-}, "developer");
+    }));
+});

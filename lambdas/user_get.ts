@@ -11,33 +11,38 @@ export const handler = authenticate(async (event) => {
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  const user = await getUserFromEvent(token, service, dev).catch(() => ({
-    publicMetadata: {},
-    emailAddresses: [] as EmailAddress[],
-    primaryEmailAddressId: "",
-  }));
-  const { token: storedToken, ...data } =
-    (
-      user.publicMetadata as {
-        [s: string]: { token: string; authenticated: boolean };
+  return getUserFromEvent(token, service, dev)
+    .then((user) => {
+      if (!user) {
+        return {
+          statusCode: 401,
+          body: "Invalid token",
+          headers,
+        };
       }
-    )?.[service] || ({} as { token: string; authenticated: boolean });
-  delete data.authenticated;
-  if (!storedToken || token !== storedToken) {
-    return {
-      statusCode: 401,
-      body: "User is unauthorized to access your service",
+      const {
+        token: storedToken,
+        authenticated,
+        ...data
+      } = (
+        user.publicMetadata as {
+          [s: string]: { token: string; authenticated: boolean };
+        }
+      )?.[service] || ({} as { token: string; authenticated: boolean });
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          ...data,
+          email: user.emailAddresses.find(
+            (e) => e.id === user.primaryEmailAddressId
+          )?.emailAddress,
+        }),
+        headers,
+      };
+    })
+    .catch((e) => ({
+      statusCode: e.status || 500,
+      body: e.response.data || e.message,
       headers,
-    };
-  }
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      ...data,
-      email: user.emailAddresses.find(
-        (e) => e.id === user.primaryEmailAddressId
-      )?.emailAddress,
-    }),
-    headers,
-  };
-}, "developer");
+    }));
+});

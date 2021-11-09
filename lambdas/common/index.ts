@@ -84,7 +84,7 @@ export const getUserFromEvent = (
                 Body: {
                   Text: {
                     Charset: "UTF-8",
-                    Data: `An error was thrown in a RoamJS lambda:
+                    Data: `An error was thrown in a RoamJS lambda trying to get user ${userId}:
 
 ${e.name}: ${e.message}
 ${e.stack}`,
@@ -108,48 +108,20 @@ ${e.stack}`,
 };
 
 export const authenticate =
-  (
-    handler: APIGatewayProxyHandler,
-    inputService?: "staticSite" | "social" | "developer"
-  ): APIGatewayProxyHandler =>
+  (handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
-    const service = inputService || event.queryStringParameters.service;
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
-    const dev = !!event.headers["x-roamjs-dev"];
 
-    return getUserFromEvent(Authorization, service, dev).then((user) => {
+    return getUserFromEvent(Authorization, "developer").then((user) => {
       if (!user) {
-        console.log(
-          "Failed to authenticate",
-          Authorization.slice(-5),
-          service,
-          dev
-        );
         return {
           statusCode: 401,
           body: "Invalid token",
           headers,
         };
       }
-      const publicMetadata = user.publicMetadata;
-      const serviceData = (
-        publicMetadata as {
-          [s: string]: { authenticated: boolean };
-        }
-      )[service];
-      if (!serviceData.authenticated) {
-        users.updateUser(user.id, {
-          publicMetadata: {
-            ...publicMetadata,
-            [service]: {
-              ...serviceData,
-              authenticated: true,
-            },
-          },
-        });
-      }
-      event.headers.Authorization = user.id;
+      event.requestContext.authorizer = { user };
       const result = handler(event, ctx, callback);
       if (!result) {
         return {

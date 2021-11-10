@@ -7,7 +7,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if (!email) {
     return {
       statusCode: 400,
-      body: "`author` is a required parameter.",
+      body: "`email` is a required parameter.",
       headers,
     };
   }
@@ -62,7 +62,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           }));
       } else if (operation === "FINISH") {
         const user = us.find((u) => !!u.privateMetadata.stripeAccount);
-        if (user) {
+        if (!user) {
           return {
             statusCode: 409,
             body: `No Stripe Account in progress`,

@@ -40,8 +40,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             stripe.accountLinks
               .create({
                 account: a.id,
-                refresh_url: `${process.env.ROAMJS_HOST}/oauth?close=true`,
-                return_url: `${process.env.ROAMJS_HOST}/oauth?close=true`,
+                refresh_url: `https://roamjs.com/oauth?close=true`,
+                return_url: `https://roamjs.com/oauth?close=true`,
                 type: "account_onboarding",
               })
               .then((l) =>
@@ -96,8 +96,8 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         return stripe.accountLinks
           .create({
             account: (user.privateMetadata.stripeAccount as string) || "",
-            refresh_url: `${process.env.ROAMJS_HOST}/oauth?close=true`,
-            return_url: `${process.env.ROAMJS_HOST}/oauth?close=true`,
+            refresh_url: `https://roamjs.com/oauth?close=true&refresh=true`,
+            return_url: `https://roamjs.com/oauth?close=true&return=true`,
             type: "account_onboarding",
           })
           .then((l) => ({

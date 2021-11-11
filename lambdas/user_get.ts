@@ -1,10 +1,11 @@
 import { authenticate, getUserFromEvent, headers } from "./common";
-import type { EmailAddress } from "@clerk/clerk-sdk-node";
 
 const normalize = (hdrs: Record<string, string>) =>
   Object.fromEntries(
     Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
   );
+
+const stripeConnectExtensions = ["developer"];
 
 export const handler = authenticate(async (event) => {
   const hs = normalize(event.headers);
@@ -36,6 +37,9 @@ export const handler = authenticate(async (event) => {
           email: user.emailAddresses.find(
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
+          ...(stripeConnectExtensions.includes(service)
+            ? { stripeAccountId: user.privateMetadata?.stripeAccount }
+            : {}),
         }),
         headers,
       };

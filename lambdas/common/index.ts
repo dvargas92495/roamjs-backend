@@ -4,6 +4,7 @@ import type { APIGatewayProxyHandler } from "aws-lambda";
 import AWS from "aws-sdk";
 
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
+export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
@@ -17,6 +18,21 @@ export const getStripe = (dev?: boolean | string) =>
       apiVersion: "2020-08-27",
     }
   );
+
+export const getTableName = (dev: boolean) =>
+  dev ? "RoamJSExtensionsDev" : "RoamJSExtensions";
+
+export const getStripePriceId = (
+  service: string,
+  dev: boolean
+): Promise<string> =>
+  dynamo
+    .getItem({
+      TableName: getTableName(dev),
+      Key: { id: { S: service } },
+    })
+    .promise()
+    .then((r) => r.Item.premium?.S);
 
 export const setupClerk = (dev?: boolean | string) => {
   if (dev) {

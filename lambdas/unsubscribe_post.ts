@@ -48,7 +48,7 @@ export const handler = async (
       }
       const { success, message } = await stripe.subscriptions
         .del(subscriptionId)
-        .then((r) => ({ success: true, message: "" }))
+        .then(() => ({ success: true, message: "" }))
         .catch((r) => ({
           success: false,
           message: r.response.data || r.message,

@@ -25,7 +25,7 @@ export const handler = authenticate(async (event) => {
         unknown
       >;
       return users
-        .updateUser(`user_${user.id}`, {
+        .updateUser(user.id, {
           publicMetadata: {
             ...user.publicMetadata,
             [service]: {

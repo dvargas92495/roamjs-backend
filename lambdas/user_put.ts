@@ -43,7 +43,7 @@ export const handler = authenticate(async (event) => {
     })
     .catch((e) => ({
       statusCode: e.status || 500,
-      body: e.response.data || e.message,
+      body: e.response?.data || e.message,
       headers,
     }));
 });

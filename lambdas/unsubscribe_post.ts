@@ -6,6 +6,7 @@ import {
   getStripe,
   headers,
   getStripePriceId,
+  authenticateUser,
 } from "./common";
 
 export const handler = async (
@@ -17,8 +18,12 @@ export const handler = async (
   };
   const token =
     event.headers.Authorization || event.headers.authorization || "";
-  return getUserFromEvent(token, extensionId, dev)
-    .then(async (user) => {
+  return Promise.all([
+    getUserFromEvent(token, extensionId, dev),
+    authenticateUser(token, dev)
+  ])
+    .then(async ([userV2, legacyUser]) => {
+      const user = userV2 || legacyUser;
       if (!user) {
         return {
           statusCode: 401,

@@ -2,6 +2,10 @@ import Stripe from "stripe";
 import { setClerkApiKey, users, User } from "@clerk/clerk-sdk-node";
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import AWS from "aws-sdk";
+import AES from "crypto-js/aes";
+import encutf8 from "crypto-js/enc-utf8";
+
+const encryptionSecret = process.env.ENCRYPTION_SECRET;
 
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
@@ -123,13 +127,47 @@ ${e.stack}`,
       );
 };
 
+export const authenticateUser = (
+  Authorization: string,
+  dev?: boolean
+): Promise<User> => {
+  if (dev) {
+    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  } else {
+    setClerkApiKey(process.env.CLERK_API_KEY);
+  }
+  const encryptionSecret = process.env.ENCRYPTION_SECRET;
+  const [email, token] = Buffer.from(
+    Authorization.replace(/^Bearer /, ""),
+    "base64"
+  )
+    .toString()
+    .split(":");
+  return users
+    .getUserList({ emailAddress: [email] })
+    .then((us) =>
+      us.find((u) => {
+        const stored = AES.decrypt(
+          u.privateMetadata.token as string,
+          encryptionSecret
+        ).toString(encutf8);
+        return stored && stored === token;
+      })
+    )
+    .catch(() => undefined);
+};
+
 export const authenticate =
   (handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
 
-    return getUserFromEvent(Authorization, "developer").then((user) => {
+    return Promise.all([
+      authenticateUser(Authorization),
+      getUserFromEvent(Authorization, "developer"),
+    ]).then(([userV2, legacyUser]) => {
+      const user = userV2 || legacyUser;
       if (!user) {
         return {
           statusCode: 401,

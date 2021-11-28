@@ -97,7 +97,11 @@ module "roamjs_lambda" {
     {
       path = "unsubscribe",
       method = "post"
-    }
+    },
+    {
+      path = "users",
+      method = "get"
+    },
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token

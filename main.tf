@@ -100,7 +100,7 @@ module "roamjs_lambda" {
     },
     {
       path = "users",
-      method = "get"
+      method = "post"
     },
   ]
   aws_access_token = var.aws_access_token

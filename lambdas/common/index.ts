@@ -94,31 +94,8 @@ export const getUserFromEvent = (
             ? user
             : undefined
         )
-        .catch((e) => {
-          return ses
-            .sendEmail({
-              Destination: {
-                ToAddresses: ["dvargas92495@gmail.com"],
-              },
-              Message: {
-                Body: {
-                  Text: {
-                    Charset: "UTF-8",
-                    Data: `An error was thrown in a RoamJS lambda trying to get user ${userId}:
-
-${e.name}: ${e.message}
-${e.stack}`,
-                  },
-                },
-                Subject: {
-                  Charset: "UTF-8",
-                  Data: `RoamJS Error: Getting User From Clerk`,
-                },
-              },
-              Source: "support@roamjs.com",
-            })
-            .promise()
-            .then(() => undefined);
+        .catch(() => {
+          return undefined;
         })
     : findUser(
         (user) =>
@@ -157,17 +134,23 @@ export const authenticateUser = (
     .catch(() => undefined);
 };
 
+export const authenticateUserShim = (
+  Authorization: string,
+  service: string,
+  dev?: boolean
+) =>
+  Promise.all([
+    authenticateUser(Authorization, dev),
+    getUserFromEvent(Authorization, service, dev),
+  ]).then(([userV2, legacyUser]) => userV2 || legacyUser);
+
 export const authenticate =
   (handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
 
-    return Promise.all([
-      authenticateUser(Authorization),
-      getUserFromEvent(Authorization, "developer"),
-    ]).then(([userV2, legacyUser]) => {
-      const user = userV2 || legacyUser;
+    return authenticateUserShim(Authorization, "developer").then((user) => {
       if (!user) {
         return {
           statusCode: 401,

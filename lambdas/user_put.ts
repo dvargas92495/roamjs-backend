@@ -1,8 +1,7 @@
 import { users } from "@clerk/clerk-sdk-node";
 import {
   authenticate,
-  authenticateUser,
-  getUserFromEvent,
+  authenticateUserShim,
   headers,
 } from "./common";
 
@@ -16,9 +15,7 @@ export const handler = authenticate(async (event) => {
   const service = hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  return (
-    service ? getUserFromEvent(token, service, dev) : authenticateUser(token)
-  )
+  return authenticateUserShim(token, service, dev)
     .then((user) => {
       if (!user) {
         return {

@@ -3,7 +3,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { headers } from "./common";
 
 export const handler: APIGatewayProxyHandler = (event) => {
-  const { email = "", dev } = event.queryStringParameters || {};
+  const { email = "", dev } = JSON.parse(event.body || '{}');
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
   } else {

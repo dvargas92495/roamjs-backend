@@ -113,7 +113,9 @@ export const authenticateUser = (
   } else {
     setClerkApiKey(process.env.CLERK_API_KEY);
   }
-  const encryptionSecret = process.env.ENCRYPTION_SECRET;
+  const encryptionSecret = dev
+    ? process.env.ENCRYPTION_SECRET_DEV
+    : process.env.ENCRYPTION_SECRET;
   const [email, token] = Buffer.from(
     Authorization.replace(/^Bearer /, ""),
     "base64"

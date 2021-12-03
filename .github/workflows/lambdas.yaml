@@ -3,7 +3,7 @@ on:
   push:
     branches: main
     paths:
-      - "lambdas/*"
+      - "lambdas/**"
       - ".github/workflows/lambdas.yaml"
 
 env:
@@ -14,6 +14,7 @@ env:
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
   STRIPE_DEV_SECRET_KEY: ${{ secrets.STRIPE_DEV_SECRET_KEY }}
   ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+  ENCRYPTION_SECRET_DEV: ${{ secrets.ENCRYPTION_SECRET_DEV }}
 
 jobs:
   deploy:

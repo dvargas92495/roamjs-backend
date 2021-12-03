@@ -54,6 +54,10 @@ variable "encryption_secret" {
     type = string
 }
 
+variable "encryption_secret_dev" {
+    type = string
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -140,6 +144,12 @@ resource "github_actions_secret" "clerk_dev_api_key" {
 }
 
 resource "github_actions_secret" "encryption_secret" {
+  repository       = "roamjs-base"
+  secret_name      = "ENCRYPTION_SECRET"
+  plaintext_value  = var.encryption_secret
+}
+
+resource "github_actions_secret" "encryption_secret_dev" {
   repository       = "roamjs-base"
   secret_name      = "ENCRYPTION_SECRET"
   plaintext_value  = var.encryption_secret

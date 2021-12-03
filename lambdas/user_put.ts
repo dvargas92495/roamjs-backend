@@ -24,6 +24,13 @@ export const handler = authenticate(async (event) => {
           headers,
         };
       }
+      if (!user.publicMetadata[service]) {
+        return {
+          statusCode: 403,
+          body: "User not allowed to access this method",
+          headers,
+        };
+      }
       const serviceData = user.publicMetadata[service] as Record<
         string,
         unknown

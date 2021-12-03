@@ -25,6 +25,13 @@ export const handler = authenticate(async (event) => {
           headers,
         };
       }
+      if (!user.publicMetadata[service]) {
+        return {
+          statusCode: 403,
+          body: "User not allowed to access this method",
+          headers,
+        };
+      }
       const {
         token: storedToken,
         authenticated,
@@ -33,7 +40,7 @@ export const handler = authenticate(async (event) => {
         user.publicMetadata as {
           [s: string]: { token: string; authenticated: boolean };
         }
-      )?.[service] || ({} as { token: string; authenticated: boolean });
+      )[service] || ({} as { token: string; authenticated: boolean });
       return {
         statusCode: 200,
         body: JSON.stringify({

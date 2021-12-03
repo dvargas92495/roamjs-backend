@@ -5,8 +5,6 @@ import AWS from "aws-sdk";
 import AES from "crypto-js/aes";
 import encutf8 from "crypto-js/enc-utf8";
 
-const encryptionSecret = process.env.ENCRYPTION_SECRET;
-
 export const ses = new AWS.SES({ apiVersion: "2010-12-01" });
 export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 

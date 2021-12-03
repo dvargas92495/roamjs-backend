@@ -151,6 +151,6 @@ resource "github_actions_secret" "encryption_secret" {
 
 resource "github_actions_secret" "encryption_secret_dev" {
   repository       = "roamjs-base"
-  secret_name      = "ENCRYPTION_SECRET"
-  plaintext_value  = var.encryption_secret
+  secret_name      = "ENCRYPTION_SECRET_DEV"
+  plaintext_value  = var.encryption_secret_dev
 }

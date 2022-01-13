@@ -20,7 +20,7 @@ export const handler = async (
     event.headers.Authorization || event.headers.authorization || "";
   return Promise.all([
     getUserFromEvent(token, extensionId, dev),
-    authenticateUser(token, dev)
+    authenticateUser(token, dev),
   ])
     .then(async ([userV2, legacyUser]) => {
       const user = userV2 || legacyUser;
@@ -34,25 +34,31 @@ export const handler = async (
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);
       const priceId = await getStripePriceId(extensionId, dev);
-      const subscriptionId = await stripe.subscriptions
+      const subscriptionItem = await stripe.subscriptions
         .list({ customer })
-        .then(
-          (s) =>
-            s.data
-              .flatMap((ss) =>
-                ss.items.data.map((si) => ({ priceId: si.price.id, id: ss.id }))
-              )
-              .find(({ priceId: id }) => priceId === id)?.id
+        .then((s) =>
+          s.data
+            .flatMap((ss) =>
+              ss.items.data.map((si) => ({
+                priceId: si.price.id,
+                count: ss.items.data.length,
+                id: si.id,
+                subscriptionId: ss.id,
+              }))
+            )
+            .find(({ priceId: id }) => priceId === id)
         );
-      if (!subscriptionId) {
+      if (!subscriptionItem) {
         return {
           statusCode: 409,
           body: `Current user is not subscribed to ${extensionId}`,
           headers,
         };
       }
-      const { success, message } = await stripe.subscriptions
-        .del(subscriptionId)
+      const { success, message } = await (subscriptionItem.count > 1
+        ? stripe.subscriptionItems.del(subscriptionItem.id)
+        : stripe.subscriptions.del(subscriptionItem.subscriptionId)
+      )
         .then(() => ({ success: true, message: "" }))
         .catch((r) => ({
           success: false,

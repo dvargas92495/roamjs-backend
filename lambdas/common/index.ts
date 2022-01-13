@@ -34,7 +34,12 @@ export const getStripePriceId = (
       Key: { id: { S: service } },
     })
     .promise()
-    .then((r) => r.Item.premium?.S);
+    .then((r) => {
+      if (r.Item) return r.Item.premium?.S
+      else {
+        throw new Error(`No Extension exists with id ${service}`);
+      }
+    });
 
 export const setupClerk = (dev?: boolean | string) => {
   if (dev) {

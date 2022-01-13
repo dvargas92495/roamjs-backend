@@ -22,53 +22,53 @@ export const handler = async (
   return Promise.all([
     getUserFromEvent(token, extensionId, dev),
     authenticateUser(token, dev),
-  ]).then(async ([userV2, legacyUser]) => {
-    const user = userV2 || legacyUser;
-    if (!user) {
-      return {
-        statusCode: 401,
-        body: "Invalid token",
-        headers,
-      };
-    }
-    const customer = user.privateMetadata.stripeId as string;
-    const stripe = getStripe(dev);
-    const priceId = await getStripePriceId(extensionId, dev);
-    const line_items = [{ price: priceId, quantity: 1 }];
-    const extensionField = idToCamel(extensionId);
-    const finishSubscription = () =>
-      users
-        .updateUser(user.id, {
-          publicMetadata: {
-            ...user.publicMetadata,
-            [extensionField]: {},
-          },
-        })
-        .then(() => ({
-          statusCode: 200,
-          body: JSON.stringify({ success: true }),
+  ])
+    .then(async ([userV2, legacyUser]) => {
+      const user = userV2 || legacyUser;
+      if (!user) {
+        return {
+          statusCode: 401,
+          body: "Invalid token",
           headers,
-        }));
+        };
+      }
+      const customer = user.privateMetadata.stripeId as string;
+      const stripe = getStripe(dev);
+      const priceId = await getStripePriceId(extensionId, dev);
+      const line_items = [{ price: priceId, quantity: 1 }];
+      const extensionField = idToCamel(extensionId);
+      const finishSubscription = () =>
+        users
+          .updateUser(user.id, {
+            publicMetadata: {
+              ...user.publicMetadata,
+              [extensionField]: {},
+            },
+          })
+          .then(() => ({
+            statusCode: 200,
+            body: JSON.stringify({ success: true }),
+            headers,
+          }));
 
-    const roamjsSubscription = await stripe.subscriptions
-      .list({ customer })
-      .then((all) => all.data.find((s) => s.metadata.project === "RoamJS"));
-    if (roamjsSubscription) {
-      return stripe.subscriptionItems
-        .create({
-          subscription: roamjsSubscription.id,
-          ...line_items[0],
-        })
-        .then(finishSubscription);
-    }
+      const roamjsSubscription = await stripe.subscriptions
+        .list({ customer })
+        .then((all) => all.data.find((s) => s.metadata.project === "RoamJS"));
+      if (roamjsSubscription) {
+        return stripe.subscriptionItems
+          .create({
+            subscription: roamjsSubscription.id,
+            ...line_items[0],
+          })
+          .then(finishSubscription);
+      }
 
-    const paymentMethod = await stripe.customers
-      .retrieve(customer)
-      .then((c) => c as Stripe.Customer)
-      .then((c) => c.invoice_settings?.default_payment_method);
+      const paymentMethod = await stripe.customers
+        .retrieve(customer)
+        .then((c) => c as Stripe.Customer)
+        .then((c) => c.invoice_settings?.default_payment_method);
 
-    return (
-      paymentMethod
+      return paymentMethod
         ? stripe.subscriptions
             .create({
               customer,
@@ -101,11 +101,11 @@ export const handler = async (
               statusCode: 200,
               body: JSON.stringify({ url: session.url }),
               headers,
-            }))
-    ).catch(() => ({
+            }));
+    })
+    .catch((e) => ({
       statusCode: 500,
-      body: "Failed to subscribe to RoamJS extension. Contact support@roamjs.com for help!",
+      body: `Failed to subscribe to RoamJS extension: ${e.message}. Contact support@roamjs.com for help!`,
       headers,
     }));
-  });
 };

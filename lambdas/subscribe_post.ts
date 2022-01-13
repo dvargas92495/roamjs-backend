@@ -34,73 +34,78 @@ export const handler = async (
     const customer = user.privateMetadata.stripeId as string;
     const stripe = getStripe(dev);
     const priceId = await getStripePriceId(extensionId, dev);
+    const line_items = [{ price: priceId, quantity: 1 }];
+    const extensionField = idToCamel(extensionId);
+    const finishSubscription = () =>
+      users
+        .updateUser(user.id, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            [extensionField]: {},
+          },
+        })
+        .then(() => ({
+          statusCode: 200,
+          body: JSON.stringify({ success: true }),
+          headers,
+        }));
+
+    const roamjsSubscription = await stripe.subscriptions
+      .list({ customer })
+      .then((all) => all.data.find((s) => s.metadata.project === "RoamJS"));
+    if (roamjsSubscription) {
+      return stripe.subscriptionItems
+        .create({
+          subscription: roamjsSubscription.id,
+          ...line_items[0],
+        })
+        .then(finishSubscription);
+    }
+
     const paymentMethod = await stripe.customers
       .retrieve(customer)
       .then((c) => c as Stripe.Customer)
       .then((c) => c.invoice_settings?.default_payment_method);
-    const line_items = [{ price: priceId, quantity: 1 }];
-    const extensionField = idToCamel(extensionId);
 
-    const { active, url, id } = paymentMethod
-      ? await stripe.subscriptions
-          .create({
-            customer,
-            items: line_items,
-            metadata: {
-              project: 'RoamJS'
-            },
-          })
-          .then((s) => ({ active: true, id: s.id, url: undefined }))
-          .catch(() => ({ active: false, id: undefined, url: undefined }))
-      : await stripe.checkout.sessions
-          .create({
-            customer,
-            payment_method_types: ["card"],
-            line_items,
-            mode: "subscription",
-            success_url: `https://roamjs.com/extensions/${extensionId}?success=true`,
-            cancel_url: `https://roamjs.com/extensions/${extensionId}?cancel=true`,
-            subscription_data: {
+    return (
+      paymentMethod
+        ? stripe.subscriptions
+            .create({
+              customer,
+              items: line_items,
               metadata: {
-                project: 'RoamJS'
-              }
-            },
-            metadata: {
-              service: extensionField,
-              userId: user.id,
-              callback: `https://lambda.roamjs.com/finish-subscription`,
-            },
-          })
-          .then((session) => ({ url: session.url, active: false, id: undefined }))
-          .catch(() => ({ active: false, url: undefined, id: undefined }));
-
-    if (!active) {
-      if (url) {
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ url }),
-          headers,
-        };
-      } else {
-        return {
-          statusCode: 500,
-          body: "Failed to subscribe to RoamJS extension. Contact support@roamjs.com for help!",
-          headers,
-        };
-      }
-    }
-
-    await users.updateUser(user.id, {
-      publicMetadata: {
-        ...user.publicMetadata,
-        [extensionField]: {},
-      },
-    });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ success: true }),
+                project: "RoamJS",
+              },
+            })
+            .then(finishSubscription)
+        : stripe.checkout.sessions
+            .create({
+              customer,
+              payment_method_types: ["card"],
+              line_items,
+              mode: "subscription",
+              success_url: `https://roamjs.com/extensions/${extensionId}?success=true`,
+              cancel_url: `https://roamjs.com/extensions/${extensionId}?cancel=true`,
+              subscription_data: {
+                metadata: {
+                  project: "RoamJS",
+                },
+              },
+              metadata: {
+                service: extensionField,
+                userId: user.id,
+                callback: `https://lambda.roamjs.com/finish-subscription`,
+              },
+            })
+            .then((session) => ({
+              statusCode: 200,
+              body: JSON.stringify({ url: session.url }),
+              headers,
+            }))
+    ).catch(() => ({
+      statusCode: 500,
+      body: "Failed to subscribe to RoamJS extension. Contact support@roamjs.com for help!",
       headers,
-    };
+    }));
   });
 };

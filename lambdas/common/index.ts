@@ -170,3 +170,11 @@ export const authenticate =
       return result;
     });
   };
+
+export const idToCamel = (extensionId: string) =>
+  extensionId
+    .split("-")
+    .map((s, i) =>
+      i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
+    )
+    .join("");

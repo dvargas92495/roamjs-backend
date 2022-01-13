@@ -1,12 +1,12 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import axios from "axios";
 import {
   getUserFromEvent,
   getStripe,
   headers,
   getStripePriceId,
   authenticateUser,
+  idToCamel,
 } from "./common";
 
 export const handler = async (
@@ -65,12 +65,7 @@ export const handler = async (
           headers,
         };
       }
-      const serviceCamelCase = extensionId
-        .split("-")
-        .map((s, i) =>
-          i == 0 ? s : `${s.substring(0, 1).toUpperCase()}${s.substring(1)}`
-        )
-        .join("");
+      const serviceCamelCase = idToCamel(extensionId);
 
       const { [serviceCamelCase]: serviceField, ...rest } =
         user.publicMetadata as {

@@ -133,6 +133,36 @@ module "roamjs_lambda" {
   developer_token  = var.developer_token
 }
 
+data "aws_iam_role" "lambda_execution" {
+  name = "roam-js-extensions-lambda-execution"
+}
+
+data "aws_iam_policy_document" "bucket_policy" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::roamjs-data/*",
+    ]
+
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_iam_role.lambda_execution.arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket" "main" {
+  bucket = "roamjs-data"
+  policy = data.aws_iam_policy_document.bucket_policy.json
+  tags = {
+    Application = "Roam JS Extensions"
+  }
+}
+
 resource "github_actions_secret" "stripe_public" {
   repository       = "roamjs-base"
   secret_name      = "STRIPE_PUBLIC_KEY"

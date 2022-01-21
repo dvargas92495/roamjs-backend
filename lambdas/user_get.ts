@@ -2,21 +2,17 @@ import {
   authenticate,
   authenticateUserShim,
   headers,
+  idToCamel,
 } from "./common";
-
-const normalize = (hdrs: Record<string, string>) =>
-  Object.fromEntries(
-    Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
-  );
 
 const stripeConnectExtensions = ["developer"];
 
 export const handler = authenticate(async (event) => {
-  const hs = normalize(event.headers);
-  const service = hs["x-roamjs-service"];
+  const hs = event.headers;
+  const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  return authenticateUserShim(token, service, dev)
+  return authenticateUserShim(token, extension, dev)
     .then((user) => {
       if (!user) {
         return {
@@ -25,7 +21,8 @@ export const handler = authenticate(async (event) => {
           headers,
         };
       }
-      if (!user.publicMetadata[service]) {
+      const extensionField = idToCamel(extension);
+      if (!user.publicMetadata[extensionField]) {
         return {
           statusCode: 403,
           body: "User not allowed to access this method",
@@ -40,7 +37,7 @@ export const handler = authenticate(async (event) => {
         user.publicMetadata as {
           [s: string]: { token: string; authenticated: boolean };
         }
-      )[service] || ({} as { token: string; authenticated: boolean });
+      )[extensionField] || ({} as { token: string; authenticated: boolean });
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -48,7 +45,7 @@ export const handler = authenticate(async (event) => {
           email: user.emailAddresses.find(
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
-          ...(stripeConnectExtensions.includes(service)
+          ...(stripeConnectExtensions.includes(extensionField)
             ? { stripeAccountId: user.privateMetadata?.stripeAccount }
             : {}),
         }),

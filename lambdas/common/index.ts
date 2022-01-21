@@ -25,19 +25,19 @@ export const getTableName = (dev: boolean) =>
   dev ? "RoamJSExtensionsDev" : "RoamJSExtensions";
 
 export const getStripePriceId = (
-  service: string,
+  extension: string,
   dev: boolean
 ): Promise<string> =>
   dynamo
     .getItem({
       TableName: getTableName(dev),
-      Key: { id: { S: service } },
+      Key: { id: { S: extension } },
     })
     .promise()
     .then((r) => {
-      if (r.Item) return r.Item.premium?.S
+      if (r.Item) return r.Item.premium?.S;
       else {
-        throw new Error(`No Extension exists with id ${service}`);
+        throw new Error(`No Extension exists with id ${extension}`);
       }
     });
 
@@ -48,6 +48,11 @@ export const setupClerk = (dev?: boolean | string) => {
     setClerkApiKey(process.env.CLERK_API_KEY);
   }
 };
+
+const normalizeHeaders = (hdrs: Record<string, string>) =>
+  Object.fromEntries(
+    Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
+  );
 
 const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
   let offset = 0;
@@ -107,15 +112,19 @@ export const getUserFromEvent = (
       );
 };
 
-export const authenticateUser = (
-  Authorization: string,
-  dev?: boolean
-): Promise<User> => {
+export const getUsersByEmail = (email: string, dev?: boolean) => {
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
   } else {
     setClerkApiKey(process.env.CLERK_API_KEY);
   }
+  return users.getUserList({ emailAddress: [email] });
+};
+
+export const authenticateUser = (
+  Authorization: string,
+  dev?: boolean
+): Promise<User> => {
   const encryptionSecret = dev
     ? process.env.ENCRYPTION_SECRET_DEV
     : process.env.ENCRYPTION_SECRET;
@@ -125,8 +134,7 @@ export const authenticateUser = (
   )
     .toString()
     .split(":");
-  return users
-    .getUserList({ emailAddress: [email] })
+  return getUsersByEmail(email, dev)
     .then((us) =>
       us.find((u) => {
         const stored = AES.decrypt(
@@ -163,6 +171,20 @@ export const authenticate =
           headers,
         };
       }
+
+      const { paths } = user.publicMetadata["developer"] as { paths: string[] };
+      event.headers = normalizeHeaders(event.headers);
+      const extension =
+        event.headers["x-roamjs-extension"] ||
+        event.headers["x-roamjs-service"];
+      if (!paths.includes(extension)) {
+        return {
+          statusCode: 403,
+          body: `Developer does not have access to data for extension ${extension}`,
+          headers,
+        };
+      }
+
       event.requestContext.authorizer = { user };
       const result = handler(event, ctx, callback);
       if (!result) {
@@ -172,7 +194,11 @@ export const authenticate =
           headers,
         };
       }
-      return result;
+      return result.catch((e) => ({
+        statusCode: 500,
+        body: e.message,
+        headers,
+      }));
     });
   };
 

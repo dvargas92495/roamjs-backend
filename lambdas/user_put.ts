@@ -3,19 +3,15 @@ import {
   authenticate,
   authenticateUserShim,
   headers,
+  idToCamel,
 } from "./common";
 
-const normalize = (hdrs: Record<string, string>) =>
-  Object.fromEntries(
-    Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
-  );
-
 export const handler = authenticate(async (event) => {
-  const hs = normalize(event.headers);
-  const service = hs["x-roamjs-service"];
+  const hs = event.headers;
+  const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  return authenticateUserShim(token, service, dev)
+  return authenticateUserShim(token, extension, dev)
     .then((user) => {
       if (!user) {
         return {
@@ -24,14 +20,15 @@ export const handler = authenticate(async (event) => {
           headers,
         };
       }
-      if (!user.publicMetadata[service]) {
+      const extensionField = idToCamel(extension);
+      if (!user.publicMetadata[extensionField]) {
         return {
           statusCode: 403,
           body: "User not allowed to access this method",
           headers,
         };
       }
-      const serviceData = user.publicMetadata[service] as Record<
+      const serviceData = user.publicMetadata[extensionField] as Record<
         string,
         unknown
       >;
@@ -39,7 +36,7 @@ export const handler = authenticate(async (event) => {
         .updateUser(user.id, {
           publicMetadata: {
             ...user.publicMetadata,
-            [service]: {
+            [extensionField]: {
               ...serviceData,
               ...JSON.parse(event.body || "{}"),
               token: serviceData.token,
@@ -48,7 +45,7 @@ export const handler = authenticate(async (event) => {
         })
         .then(() => ({
           statusCode: 200,
-          body: JSON.stringify({ succes: true }),
+          body: JSON.stringify({ success: true }),
           headers,
         }));
     })

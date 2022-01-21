@@ -167,7 +167,7 @@ export const authenticate =
       if (!user) {
         return {
           statusCode: 401,
-          body: "Invalid token",
+          body: "Invalid developer token",
           headers,
         };
       }

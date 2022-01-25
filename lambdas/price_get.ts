@@ -1,4 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
+import type { Stripe } from "stripe";
 import { getStripe } from "./common";
 
 const headers = {
@@ -10,7 +11,7 @@ export const handler = async (event: APIGatewayEvent) => {
   const { id = "", dev } = event.queryStringParameters || {};
   const stripe = getStripe(dev);
   return stripe.prices
-    .retrieve(id)
+    .retrieve(id, { expand: ["product"] })
     .then((p) => ({
       statusCode: 200,
       body: JSON.stringify({
@@ -18,6 +19,7 @@ export const handler = async (event: APIGatewayEvent) => {
         price: p.unit_amount,
         isMonthly: p.type === "recurring",
         perUse: p.recurring?.usage_type === "metered",
+        description: (p.product as Stripe.Product).description,
       }),
       headers,
     }))

@@ -17,7 +17,7 @@ export const handler = authenticate(async (event) => {
       if (!user) {
         return {
           statusCode: 401,
-          body: "Invalid token",
+          body: "Invalid user token",
           headers,
         };
       }

@@ -17,6 +17,7 @@ export const handler = async (event: APIGatewayEvent) => {
         id: p.id,
         price: p.unit_amount,
         isMonthly: p.type === "recurring",
+        perUse: p.recurring?.usage_type === "metered",
       }),
       headers,
     }))

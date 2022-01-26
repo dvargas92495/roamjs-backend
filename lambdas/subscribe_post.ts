@@ -35,7 +35,14 @@ export const handler = async (
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);
       const priceId = await getStripePriceId(extensionId, dev);
-      const line_items = [{ price: priceId, quantity: 1 }];
+      const usage = await stripe.prices
+        .retrieve(priceId)
+        .then((p) => p.recurring?.usage_type);
+      const line_items = [
+        usage === "metered"
+          ? { price: priceId }
+          : { price: priceId, quantity: 1 },
+      ];
       const extensionField = idToCamel(extensionId);
       const finishSubscription = () =>
         users

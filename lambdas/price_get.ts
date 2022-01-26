@@ -1,6 +1,6 @@
 import { APIGatewayEvent } from "aws-lambda";
 import type { Stripe } from "stripe";
-import { getStripe } from "./common";
+import { getStripe, getStripePriceId } from "./common";
 
 const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
@@ -8,10 +8,11 @@ const headers = {
 };
 
 export const handler = async (event: APIGatewayEvent) => {
-  const { id = "", dev } = event.queryStringParameters || {};
+  const { id = "", dev, extensionId = "" } = event.queryStringParameters || {};
   const stripe = getStripe(dev);
+  const priceId = extensionId ? await getStripePriceId(extensionId, !!dev) : id;
   return stripe.prices
-    .retrieve(id, { expand: ["product"] })
+    .retrieve(priceId, { expand: ["product"] })
     .then((p) => ({
       statusCode: 200,
       body: JSON.stringify({

@@ -130,6 +130,10 @@ module "roamjs_lambda" {
       path = "meter",
       method = "post"
     },
+    {
+      path = "user",
+      method = "post"
+    },
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token

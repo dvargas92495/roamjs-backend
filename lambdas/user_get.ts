@@ -45,6 +45,7 @@ export const handler = authenticate(async (event) => {
           email: user.emailAddresses.find(
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
+          id: user.id,
           ...(stripeConnectExtensions.includes(extensionField)
             ? { stripeAccountId: user.privateMetadata?.stripeAccount }
             : {}),

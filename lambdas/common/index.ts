@@ -121,6 +121,15 @@ export const getUsersByEmail = (email: string, dev?: boolean) => {
   return users.getUserList({ emailAddress: [email] });
 };
 
+export const getUser = (id: string, dev?: boolean) => {
+  if (dev) {
+    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
+  } else {
+    setClerkApiKey(process.env.CLERK_API_KEY);
+  }
+  return users.getUser(id);
+};
+
 export const authenticateUser = (
   Authorization: string,
   dev?: boolean

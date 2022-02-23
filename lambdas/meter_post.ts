@@ -2,13 +2,14 @@ import {
   authenticate,
   getStripe,
   getStripePriceId,
+  getUser,
   getUsersByEmail,
   headers,
   idToCamel,
 } from "./common";
 
 export const handler = authenticate(async (event) => {
-  const { quantity = 0, email } = JSON.parse(event.body || "{}");
+  const { quantity = 0, email, id } = JSON.parse(event.body || "{}");
   if (quantity <= 0) {
     return {
       statusCode: 400,
@@ -16,10 +17,10 @@ export const handler = authenticate(async (event) => {
       headers,
     };
   }
-  if (!email) {
+  if (!email || !id) {
     return {
       statusCode: 400,
-      body: "`email` is required to meter user",
+      body: "`id` or `email` is required to meter user",
       headers,
     };
   }
@@ -27,13 +28,15 @@ export const handler = authenticate(async (event) => {
   const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
   const dev = !!hs["x-roamjs-dev"];
   const extensionField = idToCamel(extension);
-  const user = await getUsersByEmail(email, dev).then((users) =>
-    users.find((u) => !!u.publicMetadata[extensionField])
-  );
+  const user = id
+    ? await getUser(id)
+    : await getUsersByEmail(email, dev).then((users) =>
+        users.find((u) => !!u.publicMetadata[extensionField])
+      );
   if (!user) {
     return {
       statusCode: 409,
-      body: `There are no customers with email ${email} subscribed to ${extension}`,
+      body: `There are no customers with email ${email} or id ${id} subscribed to ${extension}`,
       headers,
     };
   }

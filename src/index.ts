@@ -1,8 +1,9 @@
-import { toConfig, runExtension } from "roam-client";
-import { createConfigObserver } from "roamjs-components";
+import { createConfigObserver } from "roamjs-components/components/ConfigPage";
+import toConfigPageName from "roamjs-components/util/toConfigPageName";
+import runExtension from "roamjs-components/util/runExtension";
 
 const ID = "base";
-const CONFIG = toConfig(ID);
+const CONFIG = toConfigPageName(ID);
 runExtension(ID, () => {
   createConfigObserver({ title: CONFIG, config: { tabs: [] } });
 });

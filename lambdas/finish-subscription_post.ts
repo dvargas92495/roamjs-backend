@@ -2,6 +2,7 @@ import { users } from "@clerk/clerk-sdk-node";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import type Stripe from "stripe";
 import { headers, getStripe } from "./common";
+import emailError from "roamjs-components/backend/emailError";
 
 const normalizeHeaders = (hdrs: APIGatewayProxyEvent["headers"]) =>
   Object.fromEntries(
@@ -13,13 +14,15 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { ["stripe-signature"]: sig } = normalizeHeaders(event.headers);
   const { body } = JSON.parse(event.body || "{}");
-  const dev = !body.livemode;
+  const dev = !JSON.parse(body).livemode;
   const stripe = getStripe(dev);
   try {
     const stripeEvent = stripe.webhooks.constructEvent(
       body,
       sig || "",
-      (dev ? process.env.STRIPE_DEV_CHECKOUT_SECRET : process.env.STRIPE_CHECKOUT_SECRET) || ""
+      (dev
+        ? process.env.STRIPE_DEV_CHECKOUT_SECRET
+        : process.env.STRIPE_CHECKOUT_SECRET) || ""
     );
     const { userId, extension } = (
       stripeEvent.data.object as Stripe.Checkout.Session
@@ -58,9 +61,9 @@ export const handler = async (
     };
   } catch (err) {
     console.error(err);
-    return Promise.resolve({
+    return emailError("Failed to finish subscription", err).then((s) => ({
       statusCode: 400,
-      body: `Webhook Error: ${err.message}`,
-    });
+      body: `Webhook Error: ${s}`,
+    }));
   }
 };

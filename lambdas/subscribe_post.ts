@@ -99,7 +99,7 @@ export const handler = async (
                 },
               },
               metadata: {
-                service: extensionField,
+                extension: extensionField,
                 userId: user.id,
                 callback: `https://lambda.roamjs.com/finish-subscription`,
               },

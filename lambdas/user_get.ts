@@ -3,6 +3,7 @@ import {
   authenticateUserShim,
   headers,
   idToCamel,
+  invalidToken,
 } from "./common";
 
 const stripeConnectExtensions = ["developer"];
@@ -15,11 +16,7 @@ export const handler = authenticate(async (event) => {
   return authenticateUserShim(token, extension, dev)
     .then((user) => {
       if (!user) {
-        return {
-          statusCode: 401,
-          body: "Invalid user token",
-          headers,
-        };
+        return invalidToken;
       }
       const extensionField = idToCamel(extension);
       if (!user.publicMetadata[extensionField]) {

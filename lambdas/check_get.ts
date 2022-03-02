@@ -3,6 +3,7 @@ import {
   getUserFromEvent,
   headers,
   idToCamel,
+  invalidToken,
 } from "./common";
 import { APIGatewayProxyHandler } from "aws-lambda";
 
@@ -17,11 +18,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .then(async ([userV2, legacyUser]) => {
       const user = userV2 || legacyUser;
       if (!user) {
-        return {
-          statusCode: 401,
-          body: "Invalid token",
-          headers,
-        };
+        return invalidToken;
       }
       const extensionField = idToCamel(extensionId);
       return {

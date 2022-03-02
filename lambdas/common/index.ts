@@ -12,6 +12,12 @@ export const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
 };
 
+export const invalidToken = {
+  statusCode: 401,
+  body: "Invalid user token. Please make sure you've added your token from https://roamjs.com/user/#Extensions to Roam by entering `Set RoamJS Token` in the command palette. Also make sure that you are logged in to Roam with the same email that is registered with RoamJS.",
+  headers,
+};
+
 export const getStripe = (dev?: boolean | string) =>
   new Stripe(
     (dev ? process.env.STRIPE_DEV_SECRET_KEY : process.env.STRIPE_SECRET_KEY) ||

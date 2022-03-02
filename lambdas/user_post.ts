@@ -5,6 +5,7 @@ import {
   getStripePriceId,
   headers,
   idToCamel,
+  invalidToken,
 } from "./common";
 
 export const handler = authenticate(async (event) => {
@@ -15,11 +16,7 @@ export const handler = authenticate(async (event) => {
   return authenticateUserShim(token, extension, dev)
     .then(async (user) => {
       if (!user) {
-        return {
-          statusCode: 401,
-          body: "Invalid token",
-          headers,
-        };
+        return invalidToken;
       }
       const extensionField = idToCamel(extension);
       if (user.publicMetadata[extensionField]) {

@@ -7,6 +7,7 @@ import {
   getStripePriceId,
   authenticateUser,
   idToCamel,
+  invalidToken,
 } from "./common";
 
 export const handler = async (
@@ -25,11 +26,7 @@ export const handler = async (
     .then(async ([userV2, legacyUser]) => {
       const user = userV2 || legacyUser;
       if (!user) {
-        return {
-          statusCode: 401,
-          body: "Invalid token",
-          headers,
-        };
+        return invalidToken;
       }
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);

@@ -6,6 +6,7 @@ import {
   getUsersByEmail,
   headers,
   idToCamel,
+  setupClerk,
 } from "./common";
 
 export const handler = authenticate(async (event) => {
@@ -28,8 +29,9 @@ export const handler = authenticate(async (event) => {
   const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
   const dev = !!hs["x-roamjs-dev"];
   const extensionField = idToCamel(extension);
+  setupClerk(dev);
   const user = id
-    ? await getUser(id)
+    ? await getUser(id).catch(() => undefined)
     : await getUsersByEmail(email, dev).then((users) =>
         users.find((u) => !!u.publicMetadata[extensionField])
       );

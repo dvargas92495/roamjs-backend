@@ -3,11 +3,11 @@ import {
   getStripe,
   getStripePriceId,
   getUser,
-  getUsersByEmail,
   headers,
   idToCamel,
   setupClerk,
 } from "./common";
+import { users } from "@clerk/clerk-sdk-node";
 
 export const handler = authenticate(async (event) => {
   const { quantity = 0, email, id } = JSON.parse(event.body || "{}");
@@ -32,7 +32,7 @@ export const handler = authenticate(async (event) => {
   setupClerk(dev);
   const user = id
     ? await getUser(id).catch(() => undefined)
-    : await getUsersByEmail(email, dev).then((users) =>
+    : await users.getUserList({ emailAddress: [email] }).then((users) =>
         users.find((u) => !!u.publicMetadata[extensionField])
       );
   if (!user) {

@@ -17,7 +17,7 @@ export const handler = authenticate(async (event) => {
       headers,
     };
   }
-  if (!email || !id) {
+  if (!email && !id) {
     return {
       statusCode: 400,
       body: "`id` or `email` is required to meter user",

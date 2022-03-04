@@ -1,9 +1,8 @@
 import {
   authenticateUser,
-  getUserFromEvent,
   headers,
   idToCamel,
-  invalidToken,
+  invalidTokenResponse,
 } from "./common";
 import { APIGatewayProxyHandler } from "aws-lambda";
 
@@ -11,14 +10,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const { extensionId = "", dev } = event.queryStringParameters || {};
   const token =
     event.headers.Authorization || event.headers.authorization || "";
-  return Promise.all([
-    getUserFromEvent(token, extensionId, !!dev),
-    authenticateUser(token, !!dev),
-  ])
-    .then(async ([userV2, legacyUser]) => {
-      const user = userV2 || legacyUser;
+  return authenticateUser(token, !!dev).then(async (user) => {
       if (!user) {
-        return invalidToken;
+        return invalidTokenResponse;
       }
       const extensionField = idToCamel(extensionId);
       return {

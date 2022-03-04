@@ -1,5 +1,5 @@
 import {
-  authenticate,
+  authenticateDeveloper,
   getStripe,
   getStripePriceId,
   getUser,
@@ -9,7 +9,7 @@ import {
 } from "./common";
 import { users } from "@clerk/clerk-sdk-node";
 
-export const handler = authenticate(async (event) => {
+export const handler = authenticateDeveloper(async (event) => {
   const { quantity = 0, email, id } = JSON.parse(event.body || "{}");
   if (quantity <= 0) {
     return {

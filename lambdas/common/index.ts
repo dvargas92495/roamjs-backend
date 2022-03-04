@@ -12,7 +12,7 @@ export const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
 };
 
-export const invalidToken = {
+export const invalidTokenResponse = {
   statusCode: 401,
   body: "Invalid user token. Please make sure you've added your token from https://roamjs.com/user/#Extensions to Roam by entering `Set RoamJS Token` in the command palette. Also make sure that you are logged in to Roam with the same email that is registered with RoamJS.",
   headers,
@@ -75,49 +75,6 @@ const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
   }
 };
 
-export const getUserFromEvent = (
-  Authorization: string,
-  service: string,
-  dev?: boolean
-): Promise<User> => {
-  if (dev) {
-    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
-  } else {
-    setClerkApiKey(process.env.CLERK_API_KEY);
-  }
-  const [userId, token] =
-    Authorization.length === 32 || Authorization.includes(":")
-      ? // the old ways of generating tokens did not have user id encoded, so we query all users
-        [
-          null,
-          Authorization.split(":").slice(-1)[0],
-          Authorization.split(":").slice(-1)[0],
-        ]
-      : [
-          Buffer.from(Authorization, "base64").toString().split(":")[0],
-          Authorization,
-          Buffer.from(Authorization, "base64").toString().split(":")[1],
-        ];
-
-  return userId
-    ? users
-        .getUser(`user_${userId}`)
-        .then((user) =>
-          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
-            ?.token === token
-            ? user
-            : undefined
-        )
-        .catch(() => {
-          return undefined;
-        })
-    : findUser(
-        (user) =>
-          (user.publicMetadata as { [s: string]: { token: string } })?.[service]
-            ?.token === token
-      );
-};
-
 export const getUsersByEmail = (email: string, dev?: boolean) => {
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
@@ -162,23 +119,13 @@ export const authenticateUser = (
     .catch(() => undefined);
 };
 
-export const authenticateUserShim = (
-  Authorization: string,
-  service: string,
-  dev?: boolean
-) =>
-  Promise.all([
-    authenticateUser(Authorization, dev),
-    getUserFromEvent(Authorization, service, dev),
-  ]).then(([userV2, legacyUser]) => userV2 || legacyUser);
-
-export const authenticate =
+export const authenticateDeveloper =
   (handler: APIGatewayProxyHandler): APIGatewayProxyHandler =>
   (event, ctx, callback) => {
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
 
-    return authenticateUserShim(Authorization, "developer").then((user) => {
+    return authenticateUser(Authorization).then((user) => {
       if (!user) {
         return {
           statusCode: 401,

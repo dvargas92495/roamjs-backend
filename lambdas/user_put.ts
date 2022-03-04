@@ -1,21 +1,21 @@
 import { users } from "@clerk/clerk-sdk-node";
 import {
-  authenticate,
-  authenticateUserShim,
+  authenticateDeveloper,
+  authenticateUser,
   headers,
   idToCamel,
-  invalidToken,
+  invalidTokenResponse,
 } from "./common";
 
-export const handler = authenticate(async (event) => {
+export const handler = authenticateDeveloper(async (event) => {
   const hs = event.headers;
   const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
-  return authenticateUserShim(token, extension, dev)
+  return authenticateUser(token, dev)
     .then((user) => {
       if (!user) {
-        return invalidToken;
+        return invalidTokenResponse;
       }
       const extensionField = idToCamel(extension);
       if (!user.publicMetadata[extensionField]) {

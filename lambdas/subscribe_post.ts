@@ -1,13 +1,12 @@
 import { users } from "@clerk/clerk-sdk-node";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import {
-  getUserFromEvent,
   getStripePriceId,
   headers,
   getStripe,
   authenticateUser,
   idToCamel,
-  invalidToken,
+  invalidTokenResponse,
 } from "./common";
 import type Stripe from "stripe";
 
@@ -20,14 +19,9 @@ export const handler = async (
   };
   const token =
     event.headers.Authorization || event.headers.authorization || "";
-  return Promise.all([
-    getUserFromEvent(token, extensionId, dev),
-    authenticateUser(token, dev),
-  ])
-    .then(async ([userV2, legacyUser]) => {
-      const user = userV2 || legacyUser;
+  return authenticateUser(token, dev).then(async (user) => {
       if (!user) {
-        return invalidToken;
+        return invalidTokenResponse;
       }
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);

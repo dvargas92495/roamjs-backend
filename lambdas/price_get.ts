@@ -20,6 +20,7 @@ export const handler = async (event: APIGatewayEvent) => {
         price: p.unit_amount,
         isMonthly: p.type === "recurring",
         perUse: p.recurring?.usage_type === "metered",
+        quantity: p.transform_quantity?.divide_by || 1,
         description: (p.product as Stripe.Product).description,
       }),
       headers,

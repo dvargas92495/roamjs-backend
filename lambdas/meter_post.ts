@@ -60,7 +60,7 @@ export const handler = authenticateDeveloper(async (event) => {
   if (!subscriptionItemId) {
     return {
       statusCode: 409,
-      body: `There is no subscription attached to extension ${extension}`,
+      body: `There is no subscription attached to extension ${extension} for customer ${customer}.`,
       headers,
     };
   }

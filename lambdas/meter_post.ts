@@ -11,10 +11,10 @@ import { users } from "@clerk/clerk-sdk-node";
 
 export const handler = authenticateDeveloper(async (event) => {
   const { quantity = 0, email, id } = JSON.parse(event.body || "{}");
-  if (quantity <= 0) {
+  if (quantity === 0) {
     return {
       statusCode: 400,
-      body: "`quantity` is required and must be greater than 0",
+      body: "`quantity` is required and must not be 0",
       headers,
     };
   }
@@ -32,9 +32,9 @@ export const handler = authenticateDeveloper(async (event) => {
   setupClerk(dev);
   const user = id
     ? await getUser(id).catch(() => undefined)
-    : await users.getUserList({ emailAddress: [email] }).then((users) =>
-        users.find((u) => !!u.publicMetadata[extensionField])
-      );
+    : await users
+        .getUserList({ emailAddress: [email] })
+        .then((users) => users.find((u) => !!u.publicMetadata[extensionField]));
   if (!user) {
     return {
       statusCode: 409,
@@ -46,18 +46,21 @@ export const handler = authenticateDeveloper(async (event) => {
   const customer = user.privateMetadata.stripeId as string;
   const stripe = getStripe(dev);
   const priceId = await getStripePriceId(extension, dev);
-  const subscriptionItemId = await stripe.subscriptions.list({ customer }).then(
-    (s) =>
+  const subscriptionItem = await stripe.subscriptions
+    .list({ customer })
+    .then((s) =>
       s.data
         .flatMap((ss) =>
           ss.items.data.map((si) => ({
+            quantity: si.quantity,
+            usage: si.price.recurring.usage_type,
             priceId: si.price.id,
             id: si.id,
           }))
         )
-        .find(({ priceId: pid }) => priceId === pid)?.id
-  );
-  if (!subscriptionItemId) {
+        .find(({ priceId: pid }) => priceId === pid)
+    );
+  if (!subscriptionItem) {
     return {
       statusCode: 409,
       body: `There is no subscription attached to extension ${extension} for customer ${customer}.`,
@@ -65,12 +68,26 @@ export const handler = authenticateDeveloper(async (event) => {
     };
   }
 
-  return stripe.subscriptionItems
-    .createUsageRecord(subscriptionItemId, {
-      quantity,
-      action: "increment",
-      timestamp: Math.floor(new Date().valueOf() / 1000),
-    })
+  const action =
+    subscriptionItem.usage === "licensed"
+      ? stripe.subscriptionItems.update(subscriptionItem.id, {
+          quantity: subscriptionItem.quantity + quantity,
+        })
+      : subscriptionItem.usage === "metered"
+      ? quantity > 0
+        ? stripe.subscriptionItems.createUsageRecord(subscriptionItem.id, {
+            quantity,
+            action: "increment",
+            timestamp: Math.floor(new Date().valueOf() / 1000),
+          })
+        : Promise.reject({
+            message: `Quantity must be greater than 0 when usage type is metered`,
+            status: 400,
+          })
+      : Promise.reject(
+          new Error(`Unknown usage type: ${subscriptionItem.usage}`)
+        );
+  return action
     .then((record) => ({
       statusCode: 200,
       body: JSON.stringify({ id: record.id }),

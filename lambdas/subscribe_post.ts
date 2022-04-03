@@ -13,9 +13,10 @@ import type Stripe from "stripe";
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const { extensionId = "", dev = false } = JSON.parse(event.body || "{}") as {
+  const { extensionId = "", dev = false, quantity = 1 } = JSON.parse(event.body || "{}") as {
     extensionId: string;
-    dev: boolean;
+    dev?: boolean;
+    quantity?: number;
   };
   const token =
     event.headers.Authorization || event.headers.authorization || "";
@@ -32,7 +33,7 @@ export const handler = async (
       const line_items = [
         usage === "metered"
           ? { price: priceId }
-          : { price: priceId, quantity: 1 },
+          : { price: priceId, quantity },
       ];
       const extensionField = idToCamel(extensionId);
       const finishSubscription = () =>

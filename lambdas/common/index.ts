@@ -27,7 +27,7 @@ export const getStripe = (dev?: boolean | string) =>
     }
   );
 
-export const getTableName = (dev: boolean) =>
+const getTableName = (dev: boolean) =>
   dev ? "RoamJSExtensionsDev" : "RoamJSExtensions";
 
 export const getStripePriceId = (
@@ -47,6 +47,18 @@ export const getStripePriceId = (
       }
     });
 
+export const getExtensionUserId = (
+  extension: string,
+  dev: boolean
+): Promise<string> =>
+  dynamo
+    .getItem({
+      TableName: getTableName(dev),
+      Key: { id: { S: extension } },
+    })
+    .promise()
+    .then((r) => r.Item.user?.S);
+
 export const setupClerk = (dev?: boolean | string) => {
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
@@ -61,20 +73,12 @@ const normalizeHeaders = (hdrs: Record<string, string>) =>
   );
 
 export const getUsersByEmail = (email: string, dev?: boolean) => {
-  if (dev) {
-    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
-  } else {
-    setClerkApiKey(process.env.CLERK_API_KEY);
-  }
+  setupClerk(dev);
   return users.getUserList({ emailAddress: [email] });
 };
 
 export const getUser = (id: string, dev?: boolean) => {
-  if (dev) {
-    setClerkApiKey(process.env.CLERK_DEV_API_KEY);
-  } else {
-    setClerkApiKey(process.env.CLERK_API_KEY);
-  }
+  setupClerk(dev);
   return users.getUser(id);
 };
 

@@ -7,7 +7,11 @@ import {
   authenticateUser,
   idToCamel,
   invalidTokenResponse,
+  getExtensionUserId,
+  getUser,
 } from "./common";
+import sendEmail from "aws-sdk-plus/dist/sendEmail";
+import { emailCatch } from "roamjs-components";
 
 export const handler = async (
   event: APIGatewayProxyEvent
@@ -18,7 +22,8 @@ export const handler = async (
   };
   const token =
     event.headers.Authorization || event.headers.authorization || "";
-  return authenticateUser(token, dev).then(async (user) => {
+  return authenticateUser(token, dev)
+    .then(async (user) => {
       if (!user) {
         return invalidTokenResponse;
       }
@@ -75,6 +80,28 @@ export const handler = async (
       } else {
         console.warn("No metadata value to clear for field", serviceField);
       }
+      const userEmail = user.emailAddresses.find(
+        (e) => e.id === user.primaryEmailAddressId
+      )?.emailAddress;
+      const developer = await getExtensionUserId(extensionId, dev);
+      const developerEmail = await getUser(developer, dev)
+        .then(
+          (u) =>
+            u.emailAddresses.find((e) => e.id === u.primaryEmailAddressId)
+              ?.emailAddress
+        )
+        .catch((e) =>
+          emailCatch(
+            `Failed to find developer ${developer} for extension ${extensionId}`
+          )(e).then(() => "")
+        );
+      await sendEmail({
+        to: developerEmail || "support@roamjs.com",
+        from: "support@roamjs.com",
+        subject: `User unsubscribed from extension from within Roam`,
+        body: `User ${userEmail} has unsubscribed from the ${extensionId} extension.`,
+        replyTo: userEmail,
+      });
       return {
         statusCode: 200,
         body: JSON.stringify({

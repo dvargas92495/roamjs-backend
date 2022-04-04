@@ -60,21 +60,6 @@ const normalizeHeaders = (hdrs: Record<string, string>) =>
     Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
   );
 
-const findUser = async (predicate: (u: User) => boolean): Promise<User> => {
-  let offset = 0;
-  while (offset < 10000) {
-    const us = await users.getUserList({ limit: 100, offset });
-    const user = us.find(predicate);
-    if (user) {
-      return user;
-    }
-    if (us.length < 100) {
-      return;
-    }
-    offset += us.length;
-  }
-};
-
 export const getUsersByEmail = (email: string, dev?: boolean) => {
   if (dev) {
     setClerkApiKey(process.env.CLERK_DEV_API_KEY);
@@ -125,7 +110,7 @@ export const authenticateDeveloper =
     const Authorization =
       event.headers.Authorization || event.headers.authorization || "";
 
-    return authenticateUser(Authorization).then((user) => {
+    return authenticateUser(Authorization).then(async (user) => {
       if (!user) {
         return {
           statusCode: 401,
@@ -134,12 +119,21 @@ export const authenticateDeveloper =
         };
       }
 
-      const { paths } = user.publicMetadata["developer"] as { paths: string[] };
+      const paths = await dynamo
+        .query({
+          TableName: "RoamJSExtensions",
+          IndexName: "user-index",
+          KeyConditionExpression: "#u = :u",
+          ExpressionAttributeNames: { "#u": "user" },
+          ExpressionAttributeValues: { ":u": { S: user.id } },
+        })
+        .promise()
+        .then((r) => r.Items.map((i) => i.id.S));
       event.headers = normalizeHeaders(event.headers);
       const extension =
         event.headers["x-roamjs-extension"] ||
         event.headers["x-roamjs-service"];
-      if (!paths.includes(extension)) {
+      if (extension && !paths.includes(extension)) {
         return {
           statusCode: 403,
           body: `Developer does not have access to data for extension ${extension}`,

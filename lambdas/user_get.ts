@@ -10,7 +10,7 @@ const stripeConnectExtensions = ["developer"];
 
 export const handler = authenticateDeveloper(async (event) => {
   const hs = event.headers;
-  const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"];
+  const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"] || "";
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
   return authenticateUser(token, dev)
@@ -19,10 +19,10 @@ export const handler = authenticateDeveloper(async (event) => {
         return invalidTokenResponse;
       }
       const extensionField = idToCamel(extension);
-      if (!user.publicMetadata[extensionField]) {
+      if (extension && !user.publicMetadata[extensionField]) {
         return {
           statusCode: 403,
-          body: "User not allowed to access this method",
+          body: `User does not currently have any ${extension} data.`,
           headers,
         };
       }

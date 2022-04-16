@@ -15,7 +15,7 @@ export const handler = authenticateDeveloper(async (event) => {
   const token = hs["x-roamjs-token"];
   const dev = !!hs["x-roamjs-dev"];
   return authenticateUser(token, dev)
-    .then((user) => {
+    .then(async (user) => {
       if (!user) {
         return invalidTokenResponse;
       }
@@ -38,7 +38,7 @@ export const handler = authenticateDeveloper(async (event) => {
       )[extensionField] || ({} as { token: string; authenticated: boolean });
       const payPeriod =
         event.queryStringParameters?.expand === "period" && extension
-          ? Promise.resolve(getStripe(dev)).then((stripe) =>
+          ? await Promise.resolve(getStripe(dev)).then((stripe) =>
               stripe.subscriptions
                 .list({
                   customer: user.privateMetadata?.stripeId as string,

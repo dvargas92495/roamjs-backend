@@ -2,7 +2,6 @@ import {
   authenticateDeveloper,
   getStripe,
   getStripePriceId,
-  getUser,
   headers,
   idToCamel,
   setupClerk,
@@ -31,7 +30,7 @@ export const handler = authenticateDeveloper(async (event) => {
   const extensionField = idToCamel(extension);
   setupClerk(dev);
   const user = id
-    ? await getUser(id).catch(() => undefined)
+    ? await users.getUser(id).catch(() => undefined)
     : await users
         .getUserList({ emailAddress: [email] })
         .then((users) => users.find((u) => !!u.publicMetadata[extensionField]));

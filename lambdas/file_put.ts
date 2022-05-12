@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { authenticateUser, invalidTokenResponse } from "./common";
 import AWS from "aws-sdk";
 import headers from "roamjs-components/backend/headers";
+import emailCatch from "roamjs-components/backend/emailCatch";
 
 const s3 = new AWS.S3();
 
@@ -27,9 +28,15 @@ export const handler = async (
         Key,
       })
       .promise()
-      .then((r) => {
-        const allowedUser = r.Metadata?.["user"];
-        if (allowedUser !== user.id) {
+      .then((r) => r.Metadata?.["user"])
+      .catch((e) => {
+        if (e.statusCode === 404) {
+          return "";
+        }
+        return Promise.reject(`S3 threw an error: ${e.message}`);
+      })
+      .then((allowedUser) => {
+        if (allowedUser && allowedUser !== user.id) {
           return {
             statusCode: 403,
             headers,
@@ -49,6 +56,7 @@ export const handler = async (
             body: JSON.stringify({ success: true, etag: r.ETag }),
             headers,
           }));
-      });
+      })
+      .catch(emailCatch("User failed to upload error"));
   });
 };

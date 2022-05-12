@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { authenticateUser, invalidTokenResponse } from "./common";
 import AWS from "aws-sdk";
 import headers from "roamjs-components/backend/headers";
+import emailError from "roamjs-components/backend/emailError";
 
 const s3 = new AWS.S3();
 
@@ -28,13 +29,6 @@ export const handler = async (
       .promise()
       .then((r) => {
         const allowedUser = r.Metadata?.["user"];
-        if (!r.ETag) {
-          return {
-            statusCode: 404,
-            headers,
-            body: `File ${path} doesn't exist.`
-          }
-        }
         if (allowedUser !== user.id) {
           return {
             statusCode: 403,
@@ -46,6 +40,20 @@ export const handler = async (
           .getObject({ Bucket: "roamjs-data", Key })
           .promise()
           .then((r) => ({ statusCode: 200, body: r.Body.toString(), headers }));
+      })
+      .catch((e) => {
+        if (e.statusCode === 404) {
+          return {
+            statusCode: 404,
+            headers,
+            body: `File ${path} doesn't exist.`,
+          };
+        }
+        return emailError("User failed to download error", e).then((body) => ({
+          statusCode: 500,
+          body,
+          headers,
+        }));
       });
   });
 };

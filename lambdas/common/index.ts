@@ -96,16 +96,19 @@ export const authenticateUser = (
     .toString()
     .split(":");
   return getUsersByEmail(email, dev)
-    .then((us) =>
-      us.find((u) => {
+    .then((us) => {
+      return us.find((u) => {
         const stored = AES.decrypt(
           u.privateMetadata.token as string,
           encryptionSecret
         ).toString(encutf8);
         return stored && stored === token;
-      })
-    )
-    .catch(() => undefined);
+      });
+    })
+    .catch((e) => {
+      console.error(e);
+      return undefined;
+    });
 };
 
 export const authenticateDeveloper =

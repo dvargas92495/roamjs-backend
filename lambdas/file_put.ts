@@ -15,6 +15,13 @@ export const handler = async (
     path = "",
     body,
   } = JSON.parse(event.body || "{}");
+  if (typeof body !== 'string') {
+    return {
+      statusCode: 400,
+      headers,
+      body: "`body` parameter must be a string",
+    }
+  }
   const token =
     event.headers.Authorization || event.headers.authorization || "";
   return authenticateUser(token, dev).then(async (user) => {

@@ -25,12 +25,11 @@
     "@blueprintjs/select": "^3.16.5",
     "@clerk/clerk-sdk-node": "^2.1.0",
     "aws-sdk": "^2.944.0",
-    "crypto-js": "^4.1.1",
     "date-fns": "^2.22.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "roam-client": "^1.79.2",
-    "roamjs-components": "^0.48.4",
+    "roamjs-components": "^0.66.2",
     "stripe": "^8.178.0"
   }
 }

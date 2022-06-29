@@ -11,7 +11,7 @@ import {
   getUser,
 } from "./common";
 import sendEmail from "aws-sdk-plus/dist/sendEmail";
-import { emailCatch } from "roamjs-components";
+import emailCatch from "roamjs-components/backend/emailCatch";
 
 export const handler = async (
   event: APIGatewayProxyEvent

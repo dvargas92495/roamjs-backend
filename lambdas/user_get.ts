@@ -58,11 +58,6 @@ export const handler = authenticateDeveloper(async (event) => {
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
           id: user.id,
-          stripeAccount: user.privateMetadata?.stripeAccount,
-          name:
-            user.firstName && user.lastName
-              ? `${user.firstName} ${user.lastName}`
-              : user.firstName && "Anonymous",
           ...payPeriod,
         }),
         headers,

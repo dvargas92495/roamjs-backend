@@ -7,8 +7,6 @@ import {
   invalidTokenResponse,
 } from "./common";
 
-const stripeConnectExtensions = ["developer"];
-
 export const handler = authenticateDeveloper(async (event) => {
   const hs = event.headers;
   const extension = hs["x-roamjs-extension"] || hs["x-roamjs-service"] || "";
@@ -60,10 +58,12 @@ export const handler = authenticateDeveloper(async (event) => {
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
           id: user.id,
+          stripeAccount: user.privateMetadata?.stripeAccount,
+          name:
+            user.firstName && user.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : user.firstName && "Anonymous",
           ...payPeriod,
-          ...(stripeConnectExtensions.includes(extensionField)
-            ? { stripeAccountId: user.privateMetadata?.stripeAccount }
-            : {}),
         }),
         headers,
       };

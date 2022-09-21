@@ -154,6 +154,7 @@ module "roamjs_lambda" {
       path = "query",
       method = "post"
       size = 5120
+      timeout = 120
     }
   ]
   aws_access_token = var.aws_access_token

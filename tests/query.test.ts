@@ -1,5 +1,7 @@
 import { handler } from "../lambdas/query_post";
 import { test, expect } from "@playwright/test";
+import dotenv from "dotenv";
+dotenv.config();
 
 test("Runs Query as expected", async () => {
   await handler({
@@ -17,8 +19,8 @@ test("Runs Query as expected", async () => {
     const parsed = JSON.parse(r.body);
     expect(Object.keys(parsed)).toEqual(["result"]);
     const [[first]] = parsed.result;
-    expect(first).toHaveProperty("block/uid");
-    const sortedUids = parsed.result.map((a) => a[0]["block/uid"]).sort();
+    expect(first).toHaveProperty(":block/uid");
+    const sortedUids = parsed.result.map((a) => a[0][":block/uid"]).sort();
     expect(sortedUids.slice(0, 3)).toEqual([
       "-dvtTpP8-",
       "6K4UAxmd8",

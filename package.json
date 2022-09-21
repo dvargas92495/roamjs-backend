@@ -8,7 +8,8 @@
     "dev": "roamjs-scripts dev",
     "lambdas": "roamjs-scripts lambdas",
     "preserver": "roamjs-scripts lambdas --build",
-    "server": "localhost-lambdas --port 3010"
+    "server": "localhost-lambdas --port 3010",
+    "test": "playwright test"
   },
   "license": "MIT",
   "devDependencies": {

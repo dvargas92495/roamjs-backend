@@ -67,15 +67,15 @@ export const handler = async (event: {
                   else if (
                     redirectRes.statusCode >= 200 &&
                     redirectRes.statusCode < 400
-                  )
+                  ) {
                     resolve({
                       headers,
                       body: JSON.stringify({
-                        results: normalize(JSON.parse(body).results),
+                        result: normalize(JSON.parse(body).result),
                       }),
                       statusCode: redirectRes.statusCode,
                     });
-                  else {
+                  } else {
                     const err = new Error(body);
                     err.name = `${redirectRes.statusCode}`;
                     reject(err);

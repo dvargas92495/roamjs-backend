@@ -5,6 +5,20 @@ import type {
 import https from "https";
 import headers from "roamjs-components/backend/headers";
 
+const normalize = (data: unknown): unknown => {
+  if (Array.isArray(data)) {
+    return data.map(normalize);
+  } else if (data === null) {
+    return null;
+  } else if (typeof data === "object") {
+    return Object.fromEntries(
+      Object.entries(data).map(([k, v]) => [`:${k}`, normalize(v)])
+    );
+  } else {
+    return data;
+  }
+};
+
 export const handler = async (event: {
   headers: APIGatewayProxyEventHeaders;
   body: string;
@@ -56,7 +70,9 @@ export const handler = async (event: {
                   )
                     resolve({
                       headers,
-                      body,
+                      body: JSON.stringify({
+                        results: normalize(JSON.parse(body).results),
+                      }),
                       statusCode: redirectRes.statusCode,
                     });
                   else {

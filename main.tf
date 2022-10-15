@@ -155,7 +155,11 @@ module "roamjs_lambda" {
       method = "post"
       size = 5120
       timeout = 120
-    }
+    },
+    { 
+      path = "graphs", 
+      method = "post"
+    },
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token

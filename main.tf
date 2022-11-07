@@ -66,6 +66,14 @@ variable "stripe_dev_checkout_secret" {
     type = string
 }
 
+variable "slack_client_secret" {
+    type = string
+}
+
+variable "dropbox_client_secret" {
+  type = string
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -198,55 +206,67 @@ resource "aws_s3_bucket" "main" {
 }
 
 resource "github_actions_secret" "stripe_public" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "STRIPE_PUBLIC_KEY"
   plaintext_value  = var.stripe_public
 }
 
 resource "github_actions_secret" "stripe_secret" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "STRIPE_SECRET_KEY"
   plaintext_value  = var.stripe_secret
 }
 
 resource "github_actions_secret" "stripe_dev_secret" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "STRIPE_DEV_SECRET_KEY"
   plaintext_value  = var.stripe_dev_secret
 }
 
 resource "github_actions_secret" "clerk_api_key" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "CLERK_API_KEY"
   plaintext_value  = var.clerk_api_key
 }
 
 resource "github_actions_secret" "clerk_dev_api_key" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "CLERK_DEV_API_KEY"
   plaintext_value  = var.clerk_dev_api_key
 }
 
 resource "github_actions_secret" "encryption_secret" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "ENCRYPTION_SECRET"
   plaintext_value  = var.encryption_secret
 }
 
 resource "github_actions_secret" "encryption_secret_dev" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "ENCRYPTION_SECRET_DEV"
   plaintext_value  = var.encryption_secret_dev
 }
 
 resource "github_actions_secret" "stripe_checkout_secret" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "STRIPE_CHECKOUT_SECRET"
   plaintext_value  = var.stripe_checkout_secret
 }
 
 resource "github_actions_secret" "stripe_dev_checkout_secret" {
-  repository       = "roamjs-base"
+  repository       = "roamjs-backend"
   secret_name      = "STRIPE_DEV_CHECKOUT_SECRET"
   plaintext_value  = var.stripe_dev_checkout_secret
+}
+
+resource "github_actions_secret" "dropbox_client_secret" {
+  repository       = "roamjs-backend"
+  secret_name      = "DROPBOX_CLIENT_SECRET"
+  plaintext_value  = var.dropbox_client_secret
+}
+
+resource "github_actions_secret" "slack_client_secret" {
+  repository       = "roamjs-backend"
+  secret_name      = "SLACK_CLIENT_SECRET"
+  plaintext_value  = var.slack_client_secret
 }

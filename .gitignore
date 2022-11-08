@@ -5,3 +5,6 @@ out
 .env.local
 .env
 terraform.tfvars
+.terraform.lock.hcl
+.terraform
+dummy.zip

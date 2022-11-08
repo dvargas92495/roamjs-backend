@@ -74,6 +74,10 @@ variable "dropbox_client_secret" {
   type = string
 }
 
+variable "google_client_secret" {
+    type = string  
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -182,7 +186,11 @@ module "roamjs_lambda" {
     {
       path ="slack-url", 
       method ="post"
-    }
+    },
+    { 
+      path = "google-auth", 
+      method = "post"
+    },
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token
@@ -284,4 +292,10 @@ resource "github_actions_secret" "slack_client_secret" {
   repository       = "roamjs-backend"
   secret_name      = "SLACK_CLIENT_SECRET"
   plaintext_value  = var.slack_client_secret
+}
+
+resource "github_actions_secret" "google_client_secret" {
+  repository       = "roamjs-google"
+  secret_name      = "GOOGLE_CLIENT_SECRET"
+  plaintext_value  = var.google_client_secret
 }

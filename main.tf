@@ -3,13 +3,13 @@ terraform {
     hostname = "app.terraform.io"
     organization = "VargasArts"
     workspaces {
-      prefix = "roamjs-base"
+      name = "roamjs-base"
     }
   }
+  
   required_providers {
     github = {
       source = "integrations/github"
-      version = "4.2.0"
     }
   }
 }
@@ -89,7 +89,6 @@ module "roamjs_lambda" {
   source = "dvargas92495/lambda/roamjs"
   providers = {
     aws = aws
-    github = github
   }
 
   name = "base"
@@ -168,6 +167,22 @@ module "roamjs_lambda" {
       path = "graphs", 
       method = "post"
     },
+    {
+      path = "article",
+      method = "post"
+    },
+    {
+      path ="dropbox-auth", 
+      method ="post"
+    },
+    {
+      path = "postman", 
+      method ="post"
+    },
+    {
+      path ="slack-url", 
+      method ="post"
+    }
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token

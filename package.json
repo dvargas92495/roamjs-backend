@@ -14,6 +14,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.78",
+    "@types/charset": "^1.0.2",
     "@types/crypto-js": "^4.0.2",
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",
@@ -25,7 +26,9 @@
     "@blueprintjs/core": "^3.46.0",
     "@blueprintjs/select": "^3.16.5",
     "@clerk/clerk-sdk-node": "^2.1.0",
+    "@slack/web-api": "^6.7.2",
     "aws-sdk": "^2.944.0",
+    "charset": "^1.0.1",
     "date-fns": "^2.22.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

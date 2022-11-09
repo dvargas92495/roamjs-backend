@@ -295,7 +295,7 @@ resource "github_actions_secret" "slack_client_secret" {
 }
 
 resource "github_actions_secret" "google_client_secret" {
-  repository       = "roamjs-google"
+  repository       = "roamjs-backend"
   secret_name      = "GOOGLE_CLIENT_SECRET"
   plaintext_value  = var.google_client_secret
 }

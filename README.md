@@ -6,7 +6,6 @@ Set of all API endpoints used for RoamJS extensions. All endpoints are accessibl
 
 TODO - I need to audit all the endpoints below now that Roam Depot exists. A good chunk of them will be deprecated or removed.
 
-- `/auth POST`
 - `/price GET`
 - `/stripe POST`
 - `/user GET`
@@ -24,4 +23,9 @@ TODO - I need to audit all the endpoints below now that Roam Depot exists. A goo
 - `/error POST`
 - `/query POST`
 - `/graphs POST`
+- `/dropbox-auth POST`
+- `/google-auth POST`
+- `/postman POST`
+- `/slack-url POST`
+- `/otter POST`
       

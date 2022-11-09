@@ -177,20 +177,24 @@ module "roamjs_lambda" {
     },
     {
       path ="dropbox-auth", 
-      method ="post"
+      method = "post"
     },
     {
       path = "postman", 
-      method ="post"
+      method = "post"
     },
     {
       path ="slack-url", 
-      method ="post"
+      method = "post"
     },
     { 
       path = "google-auth", 
       method = "post"
     },
+    {
+      path = "otter",
+      method = "post"
+    }
   ]
   aws_access_token = var.aws_access_token
   aws_secret_token = var.aws_secret_token

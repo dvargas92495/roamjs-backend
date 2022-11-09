@@ -303,3 +303,11 @@ resource "github_actions_secret" "google_client_secret" {
   secret_name      = "GOOGLE_CLIENT_SECRET"
   plaintext_value  = var.google_client_secret
 }
+
+data "github_repositories" "repos" {
+  query = "roamjs"
+}
+
+output "repos" {
+  value = data.github_repositories.example
+}

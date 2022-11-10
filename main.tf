@@ -309,7 +309,7 @@ data "github_repositories" "repos" {
 }
 
 output "repos" {
-  value = data.github_repositories.example
+  value = data.github_repositories.repos
 }
 
 # lambda resource requires either filename or s3... wow

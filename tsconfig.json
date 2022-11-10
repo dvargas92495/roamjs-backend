@@ -1,12 +1,25 @@
 {
-  "extends": "./node_modules/roamjs-scripts/default.tsconfig",
-  "include": [
-    "src",
-    "lambdas"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "compilerOptions": {
+    "outDir": "./build/",
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "module": "esnext",
+    "target": "es2019",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "jsx": "react",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "importHelpers": true
+  },
+  "include": ["src", "lambdas"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "compilerOptions": {
       "module": "commonjs"

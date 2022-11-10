@@ -311,3 +311,33 @@ data "github_repositories" "repos" {
 output "repos" {
   value = data.github_repositories.example
 }
+
+# lambda resource requires either filename or s3... wow
+data "archive_file" "dummy" {
+  type        = "zip"
+  output_path = "./dummy.zip"
+
+  source {
+    content   = "// TODO IMPLEMENT"
+    filename  = "dummy.js"
+  }
+}
+
+data "aws_iam_role" "roamjs_lambda_role" {
+  name = "roam-js-extensions-lambda-execution"
+}
+
+resource "aws_lambda_function" "lambda_function" {
+  function_name = "RoamJS_backend-common"
+  role          = data.aws_iam_role.roamjs_lambda_role.arn
+  handler       = "backend-common.handler"
+  filename      = data.archive_file.dummy.output_path
+  runtime       = "nodejs16.x"
+  publish       = false
+  timeout       = 30
+  memory_size   = 5120
+
+  tags = {
+    Application = "Roam JS Extensions"
+  }
+}

@@ -19,6 +19,7 @@
     "@types/react": "^17.0.14",
     "@types/react-dom": "^17.0.9",
     "@types/rimraf": "^3.0.2",
+    "dotenv": "^16.0.3",
     "esbuild": "^0.15.13",
     "localhost-lambdas": "^0.6.3",
     "rimraf": "^3.0.2",

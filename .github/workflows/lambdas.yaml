@@ -22,7 +22,6 @@ env:
   DROPBOX_CLIENT_SECRET: ${{ secrets.DROPBOX_CLIENT_SECRET }}
   GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
   SLACK_CLIENT_SECRET: ${{ secrets.SLACK_CLIENT_SECRET }}
-  NODE_ENV: production
 
 jobs:
   deploy:
@@ -33,3 +32,5 @@ jobs:
         run: npm install
       - name: Deploy
         run: npx ts-node ./scripts/lambdas.ts
+        env:
+          NODE_ENV: production

@@ -305,7 +305,7 @@ resource "github_actions_secret" "google_client_secret" {
 }
 
 data "github_repositories" "repos" {
-  query = "roamjs"
+  query = "roamjs owner:dvargas92495"
 }
 
 output "repos" {

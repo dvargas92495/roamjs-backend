@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios, { AxiosError } from "axios";
-import headers from "roamjs-components/backend/headers";
 import charset from "charset";
+import { headers } from "./common";
 
 export const handler = async (
   event: APIGatewayEvent

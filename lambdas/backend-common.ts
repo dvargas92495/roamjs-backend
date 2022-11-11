@@ -1,18 +1,27 @@
+import { users } from "@clerk/clerk-sdk-node";
 import { authenticateUser, idToCamel, invalidTokenResponse } from "./common";
 
-export const handler = async ({
-  method,
-  token,
-  dev,
-  extension,
-}: {
-  method: "GET_USER";
-  token: string;
-  dev: boolean;
-  extension: string;
-}) => {
-  switch (method) {
+type Args =
+  | {
+      method: "GET_USER";
+      token: string;
+      dev: boolean;
+      extension: string;
+    }
+  | {
+      method: "PUT_USER";
+      token: string;
+      dev: boolean;
+      extension: string;
+      data: Record<string, unknown>;
+    };
+
+export type RoamJSUser = { email: string; id: string; [k: string]: unknown };
+
+export const handler = async (args: Args) => {
+  switch (args.method) {
     case "GET_USER": {
+      const { token, dev, extension } = args;
       const user = await authenticateUser(token, dev);
       if (!user) {
         return invalidTokenResponse["body"];
@@ -36,9 +45,36 @@ export const handler = async ({
           (e) => e.id === user.primaryEmailAddressId
         )?.emailAddress,
         id: user.id,
-      };
+      } as RoamJSUser;
+    }
+    case "PUT_USER": {
+      const { token, dev, extension, data } = args;
+      const user = await authenticateUser(token, dev);
+      if (!user) {
+        return invalidTokenResponse["body"];
+      }
+      const extensionField = idToCamel(extension);
+      if (!user.publicMetadata[extensionField]) {
+        throw new Error("User not allowed to access this extension");
+      }
+      const serviceData = user.publicMetadata[extensionField] as Record<
+        string,
+        unknown
+      >;
+      return users
+        .updateUser(user.id, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            [extensionField]: {
+              ...serviceData,
+              ...args.data,
+            },
+          },
+        })
+        .then(() => ({ success: true }));
     }
     default:
-      throw new Error(`Unknown method: ${method}`);
+      // @ts-ignore
+      throw new Error(`Unknown method: ${args.method}`);
   }
 };

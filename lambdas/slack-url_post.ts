@@ -1,8 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import axios from "axios";
-import headers from "roamjs-components/backend/headers";
 import querystring from "querystring";
 import { WebClient } from "@slack/web-api";
+import { headers } from "./common";
 
 const web = new WebClient();
 delete web["axios"].defaults.headers["User-Agent"];

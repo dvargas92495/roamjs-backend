@@ -2,9 +2,9 @@ import axios, { AxiosError } from "axios";
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import AES from "crypto-js/aes";
 import encutf8 from "crypto-js/enc-utf8";
-import randomstring from "nanoid";
-import getRoamJSUser from "roamjs-components/backend/getRoamJSUser";
-import putRoamJSUser from "roamjs-components/backend/putRoamJSUser";
+import { nanoid } from "nanoid";
+import getRoamJSUser from "./common/getRoamJSUser";
+import putRoamJSUser from "./common/putRoamJSUser";
 
 const API_BASE_URL = "https://otter.ai/forward/api/v1";
 const CSRF_COOKIE_NAME = "csrftoken";
@@ -224,7 +224,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
     }
 
-    const encryptionSecret = randomstring();
+    const encryptionSecret = nanoid();
     const output = AES.encrypt(password, encryptionSecret).toString();
     return putRoamJSUser({ token, data: { key: encryptionSecret } })
       .then(() => ({

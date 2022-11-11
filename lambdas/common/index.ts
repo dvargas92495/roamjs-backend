@@ -10,6 +10,7 @@ export const dynamo = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 export const headers = {
   "Access-Control-Allow-Origin": "https://roamresearch.com",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
 };
 
 export const invalidTokenResponse = {

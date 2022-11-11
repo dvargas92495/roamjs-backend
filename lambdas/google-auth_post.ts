@@ -1,10 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import axios from "axios";
-
-const headers = {
-  "Access-Control-Allow-Origin": "https://roamresearch.com",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
-};
+import { headers } from "./common";
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const data = JSON.parse(event.body || "{}");

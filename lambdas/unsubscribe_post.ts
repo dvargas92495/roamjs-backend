@@ -10,8 +10,8 @@ import {
   getExtensionUserId,
   getUser,
 } from "./common";
-import sendEmail from "aws-sdk-plus/dist/sendEmail";
-import emailCatch from "roamjs-components/backend/emailCatch";
+import emailCatch from "./common/emailCatch";
+import sendEmail from "./common/sendEmail";
 
 export const handler = async (
   event: APIGatewayProxyEvent

@@ -1,8 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { authenticateUser, invalidTokenResponse } from "./common";
+import { authenticateUser, headers, invalidTokenResponse } from "./common";
 import AWS from "aws-sdk";
-import headers from "roamjs-components/backend/headers";
-import emailError from "roamjs-components/backend/emailError";
+import emailError from "./common/emailError";
 
 const s3 = new AWS.S3();
 

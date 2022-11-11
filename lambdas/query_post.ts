@@ -3,7 +3,7 @@ import type {
   APIGatewayProxyResult,
 } from "aws-lambda";
 import https from "https";
-import headers from "roamjs-components/backend/headers";
+import { headers } from "./common";
 
 const normalize = (data: unknown): unknown => {
   if (Array.isArray(data)) {

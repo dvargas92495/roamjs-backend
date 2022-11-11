@@ -21,6 +21,7 @@
     "@types/rimraf": "^3.0.2",
     "dotenv": "^16.0.3",
     "esbuild": "^0.15.13",
+    "jszip": "^3.10.1",
     "localhost-lambdas": "^0.6.3",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
@@ -34,10 +35,10 @@
     "aws-sdk": "^2.944.0",
     "charset": "^1.0.1",
     "date-fns": "^2.22.1",
+    "nanoid": "^4.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "roam-client": "^1.79.2",
-    "roamjs-components": "^0.66.2",
     "stripe": "^8.178.0"
   }
 }

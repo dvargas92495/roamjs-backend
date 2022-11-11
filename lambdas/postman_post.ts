@@ -1,5 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import headers from "roamjs-components/backend/headers";
+import { headers } from "./common";
 
 export const handler = async (
   event: APIGatewayEvent

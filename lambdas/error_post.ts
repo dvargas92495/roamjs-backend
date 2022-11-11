@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import emailError from "roamjs-components/backend/emailError";
-import headers from "roamjs-components/backend/headers";
 import type { AxiosError } from "axios";
+import { headers } from "./common";
+import emailError from "./common/emailError";
 
 export const handler = async (
   event: APIGatewayProxyEvent

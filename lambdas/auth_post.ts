@@ -2,15 +2,12 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import AWS from "aws-sdk";
 import isAfter from "date-fns/isAfter";
 import addMinutes from "date-fns/addMinutes";
+import { headers } from "./common";
 
 const dynamo = new AWS.DynamoDB({
   apiVersion: "2012-08-10",
   region: "us-east-1",
 });
-const headers = {
-  "Access-Control-Allow-Origin": "https://roamresearch.com",
-  "Access-Control-Allow-Methods": "POST",
-};
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { service, otp } = JSON.parse(event.body);

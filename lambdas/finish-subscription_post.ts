@@ -2,7 +2,7 @@ import { users } from "@clerk/clerk-sdk-node";
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import type Stripe from "stripe";
 import { headers, getStripe } from "./common";
-import emailError from "roamjs-components/backend/emailError";
+import emailError from "./common/emailError";
 
 const normalizeHeaders = (hdrs: APIGatewayProxyEvent["headers"]) =>
   Object.fromEntries(

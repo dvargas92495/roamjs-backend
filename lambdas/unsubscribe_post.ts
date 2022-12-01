@@ -29,7 +29,7 @@ export const handler = async (
       }
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);
-      const priceId = await getStripePriceId(extensionId, dev);
+      const priceId = await getStripePriceId(extensionId);
       const subscriptionItem = await stripe.subscriptions
         .list({ customer })
         .then((s) =>

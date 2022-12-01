@@ -26,7 +26,7 @@ export const handler = authenticateDeveloper(async (event) => {
           headers,
         };
       }
-      const priceId = await getStripePriceId(extension, dev);
+      const priceId = await getStripePriceId(extension);
       if (priceId) {
         return {
           statusCode: 409,

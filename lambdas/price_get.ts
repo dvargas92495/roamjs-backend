@@ -5,7 +5,7 @@ import { getStripe, getStripePriceId, headers } from "./common";
 export const handler = async (event: APIGatewayEvent) => {
   const { id = "", dev, extensionId = "" } = event.queryStringParameters || {};
   const stripe = getStripe(dev);
-  const priceId = extensionId ? await getStripePriceId(extensionId, !!dev) : id;
+  const priceId = extensionId ? await getStripePriceId(extensionId) : id;
   return stripe.prices
     .retrieve(priceId, { expand: ["product"] })
     .then((p) => ({

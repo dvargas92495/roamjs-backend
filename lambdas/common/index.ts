@@ -28,16 +28,12 @@ export const getStripe = (dev?: boolean | string) =>
     }
   );
 
-const getTableName = (dev: boolean) =>
-  dev ? "RoamJSExtensionsDev" : "RoamJSExtensions";
+const TableName = "RoamJSExtensions";
 
-export const getStripePriceId = (
-  extension: string,
-  dev: boolean
-): Promise<string> =>
+export const getStripePriceId = (extension: string): Promise<string> =>
   dynamo
     .getItem({
-      TableName: getTableName(dev),
+      TableName,
       Key: { id: { S: extension } },
     })
     .promise()
@@ -48,13 +44,10 @@ export const getStripePriceId = (
       }
     });
 
-export const getExtensionUserId = (
-  extension: string,
-  dev: boolean
-): Promise<string> =>
+export const getExtensionUserId = (extension: string): Promise<string> =>
   dynamo
     .getItem({
-      TableName: getTableName(dev),
+      TableName,
       Key: { id: { S: extension } },
     })
     .promise()

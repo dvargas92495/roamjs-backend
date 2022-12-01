@@ -26,7 +26,7 @@ export const handler = async (
       }
       const customer = user.privateMetadata.stripeId as string;
       const stripe = getStripe(dev);
-      const priceId = await getStripePriceId(extensionId, dev);
+      const priceId = await getStripePriceId(extensionId);
       const usage = await stripe.prices
         .retrieve(priceId)
         .then((p) => p.recurring?.usage_type);

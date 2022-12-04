@@ -204,11 +204,11 @@ module "roamjs_lambda" {
       method = "get"
     },
     { 
-      path = "auth", 
+      path = "oauth", 
       method = "get"
     },
     { 
-      path = "auth", 
+      path = "oauth", 
       method = "put"
     },
   ]

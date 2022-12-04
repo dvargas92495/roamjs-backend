@@ -82,24 +82,7 @@ variable "roam_api_token" {
     type = string  
 }
 
-provider "aws" {
-  region = "us-east-1"
-  access_key = var.aws_access_token
-  secret_key = var.aws_secret_token
-}
-
-provider "github" {
-    owner = "dvargas92495"
-    token = var.github_token
-}
-
-module "roamjs_lambda" {
-  source = "dvargas92495/lambda/roamjs"
-  providers = {
-    aws = aws
-  }
-
-  name = "base"
+locals {
   lambdas = [
     { 
       path = "auth", 
@@ -188,7 +171,7 @@ module "roamjs_lambda" {
       method = "post"
     },
     {
-      path ="slack-url", 
+      path = "slack-url", 
       method = "post"
     },
     { 
@@ -211,11 +194,144 @@ module "roamjs_lambda" {
       path = "oauth", 
       method = "put"
     },
-  ]
-  aws_access_token = var.aws_access_token
-  aws_secret_token = var.aws_secret_token
-  github_token     = var.github_token
-  developer_token  = var.developer_token
+  ]  
+  
+  resources = distinct([
+    for lambda in local.lambdas: lambda.path
+  ])
+
+  role_arn = length(var.role_arn) > 0 ? var.role_arn : data.aws_iam_role.roamjs_lambda_role.arn 
+}
+
+provider "aws" {
+  region = "us-east-1"
+  access_key = var.aws_access_token
+  secret_key = var.aws_secret_token
+}
+
+provider "github" {
+    owner = "dvargas92495"
+    token = var.github_token
+}
+
+data "aws_api_gateway_rest_api" "rest_api" {
+  name = "roamjs-extensions"
+}
+
+resource "aws_api_gateway_resource" "resource" {
+  for_each    = toset(local.resources)
+
+  rest_api_id = data.aws_api_gateway_rest_api.rest_api.id
+  parent_id   = data.aws_api_gateway_rest_api.rest_api.root_resource_id
+  path_part   = each.value
+}
+
+resource "aws_lambda_function" "lambda_function" {
+  count    = length(local.lambdas)
+
+  function_name = "RoamJS_${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}"
+  role          = local.role_arn
+  handler       = "${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}.handler"
+  filename      = data.archive_file.dummy.output_path
+  runtime       = "nodejs16.x"
+  publish       = false
+  timeout       = local.lambdas[count.index].timeout
+  memory_size   = local.lambdas[count.index].size
+
+  tags = {
+    Application = "Roam JS Extensions"
+  }
+}
+
+resource "aws_api_gateway_method" "method" {
+  count    = length(local.lambdas)
+
+  rest_api_id   = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id   = aws_api_gateway_resource.resource[local.lambdas[count.index].path].id
+  http_method   = upper(local.lambdas[count.index].method)
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "integration" {
+  count    = length(local.lambdas)
+
+  rest_api_id             = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id             = aws_api_gateway_resource.resource[local.lambdas[count.index].path].id
+  http_method             = aws_api_gateway_method.method[count.index].http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.lambda_function[count.index].invoke_arn
+}
+
+resource "aws_lambda_permission" "apigw_lambda" {
+  count    = length(local.lambdas)
+  
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function[count.index].function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${data.aws_api_gateway_rest_api.rest_api.execution_arn}/*/*/*"
+}
+
+resource "aws_api_gateway_method" "options" {
+  for_each    = toset(local.resources)
+
+  rest_api_id   = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id   = aws_api_gateway_resource.resource[each.value].id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "mock" {
+  for_each    = toset(local.resources)
+
+  rest_api_id          = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id          = aws_api_gateway_resource.resource[each.value].id
+  http_method          = aws_api_gateway_method.options[each.value].http_method
+  type                 = "MOCK"
+  passthrough_behavior = "WHEN_NO_TEMPLATES"
+
+  request_templates = {
+    "application/json" = jsonencode(
+        {
+            statusCode = 200
+        }
+    )
+  }
+}
+
+resource "aws_api_gateway_method_response" "mock" {
+  for_each    = toset(local.resources)
+
+  rest_api_id = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id = aws_api_gateway_resource.resource[each.value].id
+  http_method = aws_api_gateway_method.options[each.value].http_method
+  status_code = "200"
+  
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers"     = true,
+    "method.response.header.Access-Control-Allow-Methods"     = true,
+    "method.response.header.Access-Control-Allow-Origin"      = true,
+    "method.response.header.Access-Control-Allow-Credentials" = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "mock" {
+  for_each    = toset(local.resources)
+  rest_api_id = data.aws_api_gateway_rest_api.rest_api.id
+  resource_id = aws_api_gateway_resource.resource[each.value].id
+  http_method = aws_api_gateway_method.options[each.value].http_method
+  status_code = aws_api_gateway_method_response.mock[each.value].status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers"     = "'Authorization, Content-Type'",
+    "method.response.header.Access-Control-Allow-Methods"     = "'GET,DELETE,OPTIONS,POST,PUT'",
+    "method.response.header.Access-Control-Allow-Origin"      = "'https://roamresearch.com'"
+  }
 }
 
 data "aws_iam_role" "lambda_execution" {
@@ -326,8 +442,32 @@ resource "github_actions_secret" "roam_api_token" {
   plaintext_value  = var.roam_api_token
 }
 
+resource "github_actions_secret" "github_token" {
+  repository       = "roamjs-backend"
+  secret_name      = "ROAMJS_RELEASE_TOKEN"
+  plaintext_value  = var.github_token
+}
+
+resource "github_actions_secret" "developer_token" {
+  repository       = "roamjs-backend"
+  secret_name      = "ROAMJS_DEVELOPER_TOKEN"
+  plaintext_value  = var.developer_token
+}
+
+resource "github_actions_secret" "deploy_aws_access_secret" {
+  repository       = "roamjs-backend"
+  secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
+  plaintext_value  = var.aws_secret_token
+}
+
+resource "github_actions_secret" "deploy_aws_access_key" {
+  repository       = "roamjs-backend"
+  secret_name      = "DEPLOY_AWS_ACCESS_KEY"
+  plaintext_value  = var.aws_access_token
+}
+
 data "github_repositories" "repos" {
-  query = "roamjs author:dvargas92495"
+  query = "author:dvargas92495 roamjs archived:false NOT -com NOT -scripts NOT -backend"
 }
 
 output "repos" {
@@ -349,7 +489,7 @@ data "aws_iam_role" "roamjs_lambda_role" {
   name = "roam-js-extensions-lambda-execution"
 }
 
-resource "aws_lambda_function" "lambda_function" {
+resource "aws_lambda_function" "lambda_function_common" {
   function_name = "RoamJS_backend-common"
   role          = data.aws_iam_role.roamjs_lambda_role.arn
   handler       = "backend-common.handler"

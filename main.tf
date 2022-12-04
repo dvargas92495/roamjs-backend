@@ -198,9 +198,7 @@ locals {
   
   resources = distinct([
     for lambda in local.lambdas: lambda.path
-  ])
-
-  role_arn = length(var.role_arn) > 0 ? var.role_arn : data.aws_iam_role.roamjs_lambda_role.arn 
+  ]) 
 }
 
 provider "aws" {
@@ -230,7 +228,7 @@ resource "aws_lambda_function" "lambda_function" {
   count    = length(local.lambdas)
 
   function_name = "RoamJS_${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}"
-  role          = local.role_arn
+  role          = data.aws_iam_role.roamjs_lambda_role.arn
   handler       = "${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}.handler"
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"

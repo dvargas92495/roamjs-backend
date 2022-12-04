@@ -233,8 +233,8 @@ resource "aws_lambda_function" "lambda_function" {
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"
   publish       = false
-  timeout       = local.lambdas[count.index].timeout
-  memory_size   = local.lambdas[count.index].size
+  timeout       = lookup(local.lambdas[count.index], "timeout", 10)
+  memory_size   = lookup(local.lambdas[count.index], "size", 128)
 
   tags = {
     Application = "Roam JS Extensions"

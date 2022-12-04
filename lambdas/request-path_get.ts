@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { dynamo, headers } from "./common";
+import { dynamo, roamjsHeaders as headers } from "./common";
 import axios from "axios";
-import https from "https";
 import { queryRoam } from "./query_post";
 
 type TextAlignment = "left" | "center" | "right" | "justify";

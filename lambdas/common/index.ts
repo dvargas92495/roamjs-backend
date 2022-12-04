@@ -13,6 +13,11 @@ export const headers = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
 };
 
+export const roamjsHeaders = {
+  "Access-Control-Allow-Origin": "https://roamjs.com",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+};
+
 export const invalidTokenResponse = {
   statusCode: 401,
   body: "Invalid user token. Please make sure you've added your token from https://roamjs.com/user/#Extensions to Roam by entering `Set RoamJS Token` in the command palette. Also make sure that you are logged in to Roam with the same email that is registered with RoamJS.",

@@ -78,6 +78,10 @@ variable "google_client_secret" {
     type = string  
 }
 
+variable "roam_api_token" {
+    type = string  
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -194,6 +198,10 @@ module "roamjs_lambda" {
     {
       path = "otter",
       method = "post"
+    },
+    {
+      path = "request-path",
+      method = "get"
     }
   ]
   aws_access_token = var.aws_access_token
@@ -302,6 +310,12 @@ resource "github_actions_secret" "google_client_secret" {
   repository       = "roamjs-backend"
   secret_name      = "GOOGLE_CLIENT_SECRET"
   plaintext_value  = var.google_client_secret
+}
+
+resource "github_actions_secret" "roam_api_token" {
+  repository       = "roamjs-backend"
+  secret_name      = "ROAM_API_TOKEN"
+  plaintext_value  = var.roam_api_token
 }
 
 data "github_repositories" "repos" {

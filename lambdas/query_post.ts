@@ -1,52 +1,25 @@
-import type {
-  APIGatewayProxyEventHeaders,
-  APIGatewayProxyResult,
-} from "aws-lambda";
+import type { APIGatewayProxyEventHeaders } from "aws-lambda";
 import https from "https";
 import { headers } from "./common";
 
-const normalize = (data: unknown): unknown => {
-  if (Array.isArray(data)) {
-    return data.map(normalize);
-  } else if (data === null) {
-    return null;
-  } else if (typeof data === "object") {
-    return Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [`:${k}`, normalize(v)])
-    );
-  } else {
-    return data;
-  }
-};
-
-export const handler = async (event: {
-  headers: APIGatewayProxyEventHeaders;
-  body: string;
+export const queryRoam = ({
+  token,
+  graph,
+  query,
+}: {
+  token: string;
+  graph: string;
+  query: string;
 }) => {
-  const { query, graph } = JSON.parse(event.body);
-  if (!graph) {
-    return {
-      statusCode: 400,
-      body: "`graph` is required",
-      headers,
-    };
-  }
-  if (!query) {
-    return {
-      statusCode: 400,
-      body: "`query` is required",
-      headers,
-    };
-  }
   const args = {
     method: "POST",
     headers: {
-      Authorization: event.headers.Authorization || event.headers.authorization,
+      Authorization: `Bearer ${token.replace(/^Bearer /, "")}`,
       Accept: "application/json",
       "Content-Type": "application/json",
     },
   };
-  return new Promise<APIGatewayProxyResult>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const req = https
       .request(
         `https://api.roamresearch.com/api/graph/${graph}/q`,
@@ -68,13 +41,7 @@ export const handler = async (event: {
                     redirectRes.statusCode >= 200 &&
                     redirectRes.statusCode < 400
                   ) {
-                    resolve({
-                      headers,
-                      body: JSON.stringify({
-                        result: normalize(JSON.parse(body).result),
-                      }),
-                      statusCode: redirectRes.statusCode,
-                    });
+                    resolve(body);
                   } else {
                     const err = new Error(body);
                     err.name = `${redirectRes.statusCode}`;
@@ -98,9 +65,41 @@ export const handler = async (event: {
       .on("error", reject);
     req.write(JSON.stringify({ query }));
     req.end();
-  }).catch((e) => ({
-    statusCode: Number(e.name) || 500,
-    body: e.message,
-    headers,
-  }));
+  });
+};
+
+export const handler = async (event: {
+  headers: APIGatewayProxyEventHeaders;
+  body: string;
+}) => {
+  const { query, graph } = JSON.parse(event.body);
+  if (!graph) {
+    return {
+      statusCode: 400,
+      body: "`graph` is required",
+      headers,
+    };
+  }
+  if (!query) {
+    return {
+      statusCode: 400,
+      body: "`query` is required",
+      headers,
+    };
+  }
+  return queryRoam({
+    graph,
+    token: event.headers.Authorization || event.headers.authorization,
+    query,
+  })
+    .then((body) => ({
+      headers,
+      body,
+      statusCode: 200,
+    }))
+    .catch((e) => ({
+      statusCode: Number(e.name) || 500,
+      body: e.message,
+      headers,
+    }));
 };

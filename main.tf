@@ -194,7 +194,9 @@ locals {
       path = "oauth", 
       method = "put"
     },
-  ]  
+  ]
+
+  roamjs_paths = ["request_path", "oauth"]
   
   resources = distinct([
     for lambda in local.lambdas: lambda.path
@@ -328,7 +330,7 @@ resource "aws_api_gateway_integration_response" "mock" {
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers"     = "'Authorization, Content-Type'",
     "method.response.header.Access-Control-Allow-Methods"     = "'GET,DELETE,OPTIONS,POST,PUT'",
-    "method.response.header.Access-Control-Allow-Origin"      = "'https://roamresearch.com'"
+    "method.response.header.Access-Control-Allow-Origin"      = contains(local.roamjs_paths, each.value) ? "'https://roamjs.com'" : "'https://roamresearch.com'"
   }
 }
 
@@ -441,25 +443,25 @@ resource "github_actions_secret" "roam_api_token" {
 }
 
 resource "github_actions_secret" "github_token" {
-  repository       = "roamjs-backend"
+  repository       = "roamjs-base"
   secret_name      = "ROAMJS_RELEASE_TOKEN"
   plaintext_value  = var.github_token
 }
 
 resource "github_actions_secret" "developer_token" {
-  repository       = "roamjs-backend"
+  repository       = "roamjs-base"
   secret_name      = "ROAMJS_DEVELOPER_TOKEN"
   plaintext_value  = var.developer_token
 }
 
 resource "github_actions_secret" "deploy_aws_access_secret" {
-  repository       = "roamjs-backend"
+  repository       = "roamjs-base"
   secret_name      = "DEPLOY_AWS_ACCESS_SECRET"
   plaintext_value  = var.aws_secret_token
 }
 
 resource "github_actions_secret" "deploy_aws_access_key" {
-  repository       = "roamjs-backend"
+  repository       = "roamjs-base"
   secret_name      = "DEPLOY_AWS_ACCESS_KEY"
   plaintext_value  = var.aws_access_token
 }

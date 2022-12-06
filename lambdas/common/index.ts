@@ -24,14 +24,10 @@ export const invalidTokenResponse = {
   headers,
 };
 
-export const getStripe = (dev?: boolean | string) =>
-  new Stripe(
-    (dev ? process.env.STRIPE_DEV_SECRET_KEY : process.env.STRIPE_SECRET_KEY) ||
-      "",
-    {
-      apiVersion: "2020-08-27",
-    }
-  );
+export const getStripe = () =>
+  new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2020-08-27",
+  });
 
 const TableName = "RoamJSExtensions";
 

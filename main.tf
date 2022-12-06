@@ -194,9 +194,25 @@ locals {
       path = "oauth", 
       method = "put"
     },
+    { 
+      path = "payment-methods", 
+      method = "put"
+    },
+    { 
+      path = "payment-methods", 
+      method = "post"
+    },
+    { 
+      path = "payment-methods", 
+      method = "get"
+    },
+    { 
+      path = "payment-methods", 
+      method = "delete"
+    },
   ]
 
-  roamjs_paths = ["request_path", "oauth"]
+  roamjs_paths = ["request-path", "oauth", "payment-methods"]
   
   resources = distinct([
     for lambda in local.lambdas: lambda.path
@@ -376,12 +392,6 @@ resource "github_actions_secret" "stripe_secret" {
   plaintext_value  = var.stripe_secret
 }
 
-resource "github_actions_secret" "stripe_dev_secret" {
-  repository       = "roamjs-backend"
-  secret_name      = "STRIPE_DEV_SECRET_KEY"
-  plaintext_value  = var.stripe_dev_secret
-}
-
 resource "github_actions_secret" "clerk_api_key" {
   repository       = "roamjs-backend"
   secret_name      = "CLERK_API_KEY"
@@ -410,12 +420,6 @@ resource "github_actions_secret" "stripe_checkout_secret" {
   repository       = "roamjs-backend"
   secret_name      = "STRIPE_CHECKOUT_SECRET"
   plaintext_value  = var.stripe_checkout_secret
-}
-
-resource "github_actions_secret" "stripe_dev_checkout_secret" {
-  repository       = "roamjs-backend"
-  secret_name      = "STRIPE_DEV_CHECKOUT_SECRET"
-  plaintext_value  = var.stripe_dev_checkout_secret
 }
 
 resource "github_actions_secret" "dropbox_client_secret" {

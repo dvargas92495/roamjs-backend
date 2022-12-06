@@ -16,7 +16,12 @@ type Args =
       data: Record<string, unknown>;
     };
 
-export type RoamJSUser = { email: string; id: string; [k: string]: unknown };
+export type RoamJSUser = {
+  email: string;
+  id: string;
+  customer?: string;
+  [k: string]: unknown;
+};
 
 export const handler = async (args: Args) => {
   switch (args.method) {
@@ -45,6 +50,7 @@ export const handler = async (args: Args) => {
           (e) => e.id === user.primaryEmailAddressId
         )?.emailAddress,
         id: user.id,
+        customer: user.privateMetadata.stripeId as string,
       } as RoamJSUser;
     }
     case "PUT_USER": {

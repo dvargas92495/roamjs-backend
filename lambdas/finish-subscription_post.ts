@@ -14,15 +14,12 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult> => {
   const { ["stripe-signature"]: sig } = normalizeHeaders(event.headers);
   const { body } = JSON.parse(event.body || "{}");
-  const dev = !JSON.parse(body).livemode;
-  const stripe = getStripe(dev);
+  const stripe = getStripe();
   try {
     const stripeEvent = stripe.webhooks.constructEvent(
       body,
       sig || "",
-      (dev
-        ? process.env.STRIPE_DEV_CHECKOUT_SECRET
-        : process.env.STRIPE_CHECKOUT_SECRET) || ""
+      process.env.STRIPE_CHECKOUT_SECRET || ""
     );
     const { userId, extension } = (
       stripeEvent.data.object as Stripe.Checkout.Session

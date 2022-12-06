@@ -1,5 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { roamjsHeaders as headers, getStripe } from "./common";
+import { headers, getStripe } from "./common";
 import { awsGetRoamJSUser } from "./common/getRoamJSUser";
 
 export const handler = awsGetRoamJSUser(async (user) => {

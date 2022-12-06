@@ -212,7 +212,7 @@ locals {
     },
   ]
 
-  roamjs_paths = ["request-path", "oauth", "payment-methods"]
+  roamjs_paths = ["request-path", "oauth"]
   
   resources = distinct([
     for lambda in local.lambdas: lambda.path

@@ -167,7 +167,7 @@ const getApi = ({
   password: string;
   token: string;
 }) =>
-  getRoamJSUser({ token })
+  getRoamJSUser({ token, extensionId: "otter" })
     .then((data) => AES.decrypt(password, data.key as string).toString(encutf8))
     .then((password) => {
       return new OtterApi({

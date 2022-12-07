@@ -226,7 +226,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const encryptionSecret = nanoid();
     const output = AES.encrypt(password, encryptionSecret).toString();
-    return putRoamJSUser({ token, data: { key: encryptionSecret } })
+    return putRoamJSUser({
+      token,
+      data: { key: encryptionSecret },
+      extensionId: "otter",
+    })
       .then(() => ({
         statusCode: 200,
         body: JSON.stringify({ output }),

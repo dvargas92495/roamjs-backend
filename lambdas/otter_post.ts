@@ -250,11 +250,19 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         otterApi
           .init()
           .then(() =>
-            otterApi.getSpeeches(
-              params?.lastLoad && params?.lastModified
-                ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
-                : ""
-            )
+            otterApi
+              .getSpeeches(
+                params?.lastLoad && params?.lastModified
+                  ? `&modified_after=${params.lastModified}&last_load_ts=${params.lastLoad}`
+                  : ""
+              )
+              .catch((e) =>
+                Promise.reject(
+                  new Error(
+                    `An error was thrown from Otter itself: ${e.message}`
+                  )
+                )
+              )
           )
       )
       .then(({ speeches, last_load_ts, last_modified_at, end_of_list }) => ({

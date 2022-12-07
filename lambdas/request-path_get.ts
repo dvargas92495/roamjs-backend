@@ -92,7 +92,7 @@ const q = (query: string) => {
   return queryRoam({
     query,
     graph: "roamjs",
-    token: process.env.ROAM_API_TOKEN,
+    token: process.env.ROAM_API_TOKEN || "",
   }).then((body) => JSON.parse(body).result as PullBlock[][]);
 };
 

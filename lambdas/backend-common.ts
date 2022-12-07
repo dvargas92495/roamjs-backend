@@ -54,14 +54,16 @@ export const handler = async (args: Args) => {
       } as RoamJSUser;
     }
     case "PUT_USER": {
-      const { token, dev, extension, data } = args;
+      const { token, dev, extension } = args;
       const user = await authenticateUser(token, dev);
       if (!user) {
         return invalidTokenResponse["body"];
       }
       const extensionField = idToCamel(extension);
       if (!user.publicMetadata[extensionField]) {
-        throw new Error("User not allowed to access this extension");
+        throw new Error(
+          `User not allowed to access this extension: ${extensionField}`
+        );
       }
       const serviceData = user.publicMetadata[extensionField] as Record<
         string,

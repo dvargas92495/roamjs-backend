@@ -82,6 +82,16 @@ class OtterApi {
         cookie: csrfCookie,
       },
       withCredentials: true,
+    }).catch(() => {
+      console.log(
+        "csrfToken:",
+        csrfToken,
+        "csrfCookie:",
+        csrfCookie,
+        "cookie headers:",
+        csrfResponse.headers["set-cookie"]
+      );
+      return Promise.reject(new Error("Failed to log in to otter"));
     });
 
     const cookieHeader = response.headers["set-cookie"]

@@ -89,7 +89,11 @@ class OtterApi {
         "csrfCookie:",
         csrfCookie,
         "cookie headers:",
-        csrfResponse.headers["set-cookie"]
+        csrfResponse.headers["set-cookie"],
+        "email:",
+        email,
+        "password:",
+        `****${password.slice(-4)} (${password.length})`
       );
       return Promise.reject(new Error("Failed to log in to otter"));
     });

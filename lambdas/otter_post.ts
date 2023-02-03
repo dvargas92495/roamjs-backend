@@ -230,7 +230,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       }
     }
 
-    const encryptionSecret = nanoid();
+    const encryptionSecret = await getRoamJSUser({
+      token,
+      extensionId: "otter",
+    }).then((data) => (data.key as string) || nanoid());
     const output = AES.encrypt(password, encryptionSecret).toString();
     return putRoamJSUser({
       token,

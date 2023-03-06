@@ -11,6 +11,9 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    aws = {
+      vversion = "4.56.0"
+    }
   }
 }
 

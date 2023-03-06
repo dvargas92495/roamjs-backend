@@ -246,7 +246,7 @@ resource "aws_lambda_function" "lambda_function" {
   count    = length(local.lambdas)
 
   function_name = "RoamJS_${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}"
-  role          = data.aws_iam_role.roamjs_lambda_role.arn
+  role          = aws_iam_role.roamjs_lambda_role.arn
   handler       = "${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}.handler"
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"
@@ -350,8 +350,60 @@ resource "aws_api_gateway_integration_response" "mock" {
   }
 }
 
-data "aws_iam_role" "lambda_execution" {
+data "aws_iam_policy_document" "lambda_execution_policy" {
+  statement {
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+      "cloudfront:ListDistributions",
+      "dynamodb:BatchGetItem",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "execute-api:Invoke",
+      "execute-api:ManageConnections",
+      "lambda:InvokeFunction",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:CreateLogGroup",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "ses:sendEmail",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "sts:AssumeRole"
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/roam-js-extensions-lambda-execution"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "lambda_execution_policy" {
   name = "roam-js-extensions-lambda-execution"
+  policy = data.aws_iam_policy_document.lambda_execution_policy.json
+}
+
+resource "aws_iam_role" "roamjs_lambda_role" {
+  name = "roam-js-extensions-lambda-execution"
+
+  assume_role_policy = data.aws_iam_policy_document.assume_lambda_policy.json
+  tags = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "attach" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_execution_policy.arn
 }
 
 data "aws_iam_policy_document" "bucket_policy" {
@@ -367,7 +419,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 
     principals {
       type        = "AWS"
-      identifiers = [data.aws_iam_role.lambda_execution.arn]
+      identifiers = [aws_iam_role.roamjs_lambda_role.arn]
     }
   }
 }
@@ -489,13 +541,19 @@ data "archive_file" "dummy" {
   }
 }
 
-data "aws_iam_role" "roamjs_lambda_role" {
-  name = "roam-js-extensions-lambda-execution"
+data "aws_iam_policy_document" "assume_lambda_policy" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+  }
 }
 
 resource "aws_lambda_function" "lambda_function_common" {
   function_name = "RoamJS_backend-common"
-  role          = data.aws_iam_role.roamjs_lambda_role.arn
+  role          = aws_iam_role.roamjs_lambda_role.arn
   handler       = "backend-common.handler"
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"

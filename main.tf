@@ -12,7 +12,8 @@ terraform {
       source = "integrations/github"
     }
     aws = {
-      vversion = "4.56.0"
+      // https://github.com/hashicorp/terraform-provider-aws/issues/29777
+      version = "4.56.0"
     }
   }
 }

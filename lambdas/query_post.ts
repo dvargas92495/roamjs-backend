@@ -25,7 +25,7 @@ export const queryRoam = ({
         `https://api.roamresearch.com/api/graph/${graph}/q`,
         args,
         (res) => {
-          if (res.statusCode === 307) {
+          if (res.statusCode === 307 || res.statusCode === 308) {
             const redirect = https.request(
               res.headers.location,
               args,
@@ -56,7 +56,7 @@ export const queryRoam = ({
           } else {
             reject(
               new Error(
-                `Expected an immediate redirect (307), got: ${res.statusCode}`
+                `Expected a redirect (307 or 308), got: ${res.statusCode}`
               )
             );
           }

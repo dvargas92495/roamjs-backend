@@ -350,6 +350,8 @@ resource "aws_api_gateway_integration_response" "mock" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "lambda_execution_policy" {
   statement {
     actions = [
@@ -398,7 +400,9 @@ resource "aws_iam_role" "roamjs_lambda_role" {
   name = "roam-js-extensions-lambda-execution"
 
   assume_role_policy = data.aws_iam_policy_document.assume_lambda_policy.json
-  tags = local.tags
+  tags = {
+    Application = "Roam JS Extensions"
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "attach" {

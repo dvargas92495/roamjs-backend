@@ -8,3 +8,4 @@ terraform.tfvars
 .terraform.lock.hcl
 .terraform
 dummy.zip
+scripts/debug.ts

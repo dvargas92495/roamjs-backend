@@ -28,7 +28,7 @@ export const handler = async (
         return invalidTokenResponse;
       }
       const customer = user.privateMetadata.stripeId as string;
-      const stripe = getStripe(dev);
+      const stripe = getStripe();
       const priceId = await getStripePriceId(extensionId);
       const subscriptionItem = await stripe.subscriptions
         .list({ customer })
@@ -83,7 +83,7 @@ export const handler = async (
       const userEmail = user.emailAddresses.find(
         (e) => e.id === user.primaryEmailAddressId
       )?.emailAddress;
-      const developer = await getExtensionUserId(extensionId, dev);
+      const developer = await getExtensionUserId(extensionId);
       const developerEmail = await getUser(developer, dev)
         .then(
           (u) =>

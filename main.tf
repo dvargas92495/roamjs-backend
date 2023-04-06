@@ -210,9 +210,13 @@ locals {
       path = "payment-methods", 
       method = "get"
     },
-    { 
-      path = "payment-methods", 
+    {
+      path = "payment-methods",
       method = "delete"
+    },
+    {
+      path = "token",
+      method = "post"
     },
   ]
 

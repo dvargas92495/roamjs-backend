@@ -36,7 +36,7 @@ export const handler = authenticateDeveloper(async (event) => {
       )[extensionField] || ({} as { token: string; authenticated: boolean });
       const payPeriod =
         event.queryStringParameters?.expand === "period" && extension
-          ? await Promise.resolve(getStripe(dev)).then((stripe) =>
+          ? await Promise.resolve(getStripe()).then((stripe) =>
               stripe.subscriptions
                 .list({
                   customer: user.privateMetadata?.stripeId as string,

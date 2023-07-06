@@ -2,7 +2,6 @@ import { users } from "@clerk/clerk-sdk-node";
 import {
   authenticateDeveloper,
   authenticateUser,
-  getStripePriceId,
   headers,
   idToCamel,
   invalidTokenResponse,
@@ -25,14 +24,6 @@ export const handler = authenticateDeveloper(async (event) => {
           body: "User has already inited this extension",
           headers,
         };
-      }
-      const priceId = await getStripePriceId(extension);
-      if (priceId) {
-        return {
-          statusCode: 409,
-          body: 'Extension requires a subscription',
-          headers,
-        }
       }
       return users
         .updateUser(user.id, {

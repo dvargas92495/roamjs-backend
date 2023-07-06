@@ -1,7 +1,6 @@
 import {
   authenticateDeveloper,
   authenticateUser,
-  getStripe,
   headers,
   idToCamel,
   invalidTokenResponse,
@@ -34,22 +33,6 @@ export const handler = authenticateDeveloper(async (event) => {
           [s: string]: { token: string; authenticated: boolean };
         }
       )[extensionField] || ({} as { token: string; authenticated: boolean });
-      const payPeriod =
-        event.queryStringParameters?.expand === "period" && extension
-          ? await Promise.resolve(getStripe()).then((stripe) =>
-              stripe.subscriptions
-                .list({
-                  customer: user.privateMetadata?.stripeId as string,
-                })
-                .then((s) =>
-                  s.data.find((s) => s.metadata.project === "RoamJS")
-                )
-                .then((s) => ({
-                  start: s.current_period_start,
-                  end: s.current_period_end,
-                }))
-            )
-          : {};
       return {
         statusCode: 200,
         body: JSON.stringify({
@@ -58,7 +41,6 @@ export const handler = authenticateDeveloper(async (event) => {
             (e) => e.id === user.primaryEmailAddressId
           )?.emailAddress,
           id: user.id,
-          ...payPeriod,
         }),
         headers,
       };

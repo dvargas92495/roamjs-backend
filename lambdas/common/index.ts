@@ -31,20 +31,6 @@ export const getStripe = () =>
 
 const TableName = "RoamJSExtensions";
 
-export const getStripePriceId = (extension: string): Promise<string> =>
-  dynamo
-    .getItem({
-      TableName,
-      Key: { id: { S: extension } },
-    })
-    .promise()
-    .then((r) => {
-      if (r.Item) return r.Item.premium?.S;
-      else {
-        throw new Error(`No Extension exists with id ${extension}`);
-      }
-    });
-
 export const getExtensionUserId = (extension: string): Promise<string> =>
   dynamo
     .getItem({
@@ -117,28 +103,6 @@ export const authenticateDeveloper =
         return {
           statusCode: 401,
           body: "Invalid developer token",
-          headers,
-        };
-      }
-
-      const paths = await dynamo
-        .query({
-          TableName: "RoamJSExtensions",
-          IndexName: "user-index",
-          KeyConditionExpression: "#u = :u",
-          ExpressionAttributeNames: { "#u": "user" },
-          ExpressionAttributeValues: { ":u": { S: user.id } },
-        })
-        .promise()
-        .then((r) => r.Items.map((i) => i.id.S));
-      event.headers = normalizeHeaders(event.headers);
-      const extension =
-        event.headers["x-roamjs-extension"] ||
-        event.headers["x-roamjs-service"];
-      if (extension && !paths.includes(extension)) {
-        return {
-          statusCode: 403,
-          body: `Developer does not have access to data for extension ${extension}`,
           headers,
         };
       }

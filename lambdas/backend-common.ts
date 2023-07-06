@@ -50,7 +50,6 @@ export const handler = async (args: Args) => {
           (e) => e.id === user.primaryEmailAddressId
         )?.emailAddress,
         id: user.id,
-        customer: user.privateMetadata.stripeId as string,
       } as RoamJSUser;
     }
     case "PUT_USER": {

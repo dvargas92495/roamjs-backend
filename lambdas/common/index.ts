@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import { setClerkApiKey, users, User } from "@clerk/clerk-sdk-node";
 import type { APIGatewayProxyHandler } from "aws-lambda";
 import AWS from "aws-sdk";
@@ -24,11 +23,6 @@ export const invalidTokenResponse = {
   headers,
 };
 
-export const getStripe = () =>
-  new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-    apiVersion: "2020-08-27",
-  });
-
 const TableName = "RoamJSExtensions";
 
 export const getExtensionUserId = (extension: string): Promise<string> =>
@@ -47,11 +41,6 @@ export const setupClerk = (dev?: boolean | string) => {
     setClerkApiKey(process.env.CLERK_API_KEY);
   }
 };
-
-const normalizeHeaders = (hdrs: Record<string, string>) =>
-  Object.fromEntries(
-    Object.entries(hdrs).map(([k, v]) => [k.toLowerCase(), v])
-  );
 
 export const getUsersByEmail = (email: string, dev?: boolean) => {
   setupClerk(dev);

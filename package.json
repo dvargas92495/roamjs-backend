@@ -42,7 +42,6 @@
     "randomstring": "^1.2.3",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "roam-client": "^1.79.2",
-    "stripe": "^8.178.0"
+    "roam-client": "^1.79.2"
   }
 }

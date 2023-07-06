@@ -34,18 +34,6 @@ variable "github_token" {
   type = string
 }
 
-variable "stripe_public" {
-    type = string
-}
-
-variable "stripe_secret" {
-    type = string
-}
-
-variable "stripe_dev_secret" {
-    type = string
-}
-
 variable "clerk_api_key" {
     type = string
 }
@@ -59,14 +47,6 @@ variable "encryption_secret" {
 }
 
 variable "encryption_secret_dev" {
-    type = string
-}
-
-variable "stripe_checkout_secret" {
-    type = string
-}
-
-variable "stripe_dev_checkout_secret" {
     type = string
 }
 
@@ -93,14 +73,6 @@ locals {
       method = "post"
     },
     {
-      path = "price",
-      method = "get"
-    },
-    {
-      path = "stripe-account",
-      method = "post"
-    },
-    {
       path = "user",
       method = "get"
     },
@@ -109,28 +81,12 @@ locals {
       method = "put"
     },
     {
-      path = "unsubscribe",
-      method = "post"
-    },
-    {
       path = "users",
-      method = "post"
-    },
-    {
-      path = "subscribe",
-      method = "post"
-    },
-    {
-      path = "finish-subscription",
       method = "post"
     },
     {
       path = "check",
       method = "get"
-    },
-    {
-      path = "meter",
-      method = "post"
     },
     {
       path = "user",
@@ -197,22 +153,6 @@ locals {
     { 
       path = "oauth", 
       method = "put"
-    },
-    { 
-      path = "payment-methods", 
-      method = "put"
-    },
-    { 
-      path = "payment-methods", 
-      method = "post"
-    },
-    { 
-      path = "payment-methods", 
-      method = "get"
-    },
-    {
-      path = "payment-methods",
-      method = "delete"
     },
     {
       path = "token",
@@ -444,18 +384,6 @@ resource "aws_s3_bucket" "main" {
   }
 }
 
-resource "github_actions_secret" "stripe_public" {
-  repository       = "roamjs-backend"
-  secret_name      = "STRIPE_PUBLIC_KEY"
-  plaintext_value  = var.stripe_public
-}
-
-resource "github_actions_secret" "stripe_secret" {
-  repository       = "roamjs-backend"
-  secret_name      = "STRIPE_SECRET_KEY"
-  plaintext_value  = var.stripe_secret
-}
-
 resource "github_actions_secret" "clerk_api_key" {
   repository       = "roamjs-backend"
   secret_name      = "CLERK_API_KEY"
@@ -478,12 +406,6 @@ resource "github_actions_secret" "encryption_secret_dev" {
   repository       = "roamjs-backend"
   secret_name      = "ENCRYPTION_SECRET_DEV"
   plaintext_value  = var.encryption_secret_dev
-}
-
-resource "github_actions_secret" "stripe_checkout_secret" {
-  repository       = "roamjs-backend"
-  secret_name      = "STRIPE_CHECKOUT_SECRET"
-  plaintext_value  = var.stripe_checkout_secret
 }
 
 resource "github_actions_secret" "dropbox_client_secret" {

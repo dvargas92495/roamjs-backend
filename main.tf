@@ -456,14 +456,6 @@ resource "github_actions_secret" "deploy_aws_access_key" {
   plaintext_value  = var.aws_access_token
 }
 
-data "github_repositories" "repos" {
-  query = "author:dvargas92495 roamjs archived:false NOT -com NOT -scripts NOT -backend"
-}
-
-output "repos" {
-  value = data.github_repositories.repos
-}
-
 # lambda resource requires either filename or s3... wow
 data "archive_file" "dummy" {
   type        = "zip"

@@ -4,23 +4,31 @@ Set of all API endpoints used for RoamJS extensions. All endpoints are accessibl
 
 ## Endpoints
 
-TODO - I need to audit all the endpoints below now that Roam Depot exists. A good chunk of them will be deprecated or removed.
+TODO - All endpoints below will be removed or migrated to SamePage.
 
-- `/user GET`
-- `/user PUT`
-- `/users POST`
-- `/check GET`
-- `/meter POST`
-- `/user POST`
-- `/file GET`
-- `/file PUT`
-- `/users GET`
-- `/error POST`
-- `/query POST`
-- `/graphs POST`
-- `/dropbox-auth POST`
-- `/google-auth POST`
-- `/postman POST`
-- `/slack-url POST`
-- `/otter POST`
-      
+```js
+[
+    "/auth post",
+    "/user get",
+    "/user put",
+    "/users post",
+    "/check get",
+    "/user post",
+    "/file get",
+    "/file put",
+    "/users get",
+    "/error post",
+    "query post",
+    "/graphs post",
+    "/article post",
+    "/dropbox-auth post",
+    "/postman post",
+    "/slack-url post",
+    "/google-auth post", // DONE - awaiting merge of Google to Roam Depo
+    "/otter post",
+    "/request-path get",
+    "/oauth get",
+    "/oauth put",
+    "/token post",
+]
+```

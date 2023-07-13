@@ -69,10 +69,10 @@ export const authenticateUser = (
   return getUsersByEmail(email, dev)
     .then((us) => {
       return us.find((u) => {
-        const storedToken = u.privateMetadata.token as string;
+        const storedToken = u.privateMetadata.rawToken as string;
         if (storedToken === token) return true;
         const stored = AES.decrypt(
-          storedToken,
+          u.privateMetadata.token as string,
           encryptionSecret
         ).toString(encutf8);
         return stored && stored === token;

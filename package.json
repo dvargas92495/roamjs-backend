@@ -8,6 +8,7 @@
     "dev": "roamjs-scripts dev",
     "preserver": "NODE_ENV=development ts-node ./scripts/lambdas.ts",
     "server": "localhost-lambdas --port 3010",
+    "start": "npm run server",
     "test": "playwright test"
   },
   "license": "MIT",

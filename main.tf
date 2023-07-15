@@ -69,7 +69,23 @@ variable "roam_api_token" {
 locals {
   lambdas = [
     { 
+      path = "oauth", 
+      method = "get"
+    },
+    { 
+      path = "oauth", 
+      method = "put"
+    },
+    { 
       path = "auth", 
+      method = "post"
+    },
+    { 
+      path = "google-auth", 
+      method = "post"
+    },
+    {
+      path = "otter",
       method = "post"
     },
     {
@@ -134,27 +150,11 @@ locals {
       path = "slack-url", 
       method = "post"
     },
-    { 
-      path = "google-auth", 
-      method = "post"
-    },
-    {
-      path = "otter",
-      method = "post"
-    },
-    {
-      path = "request-path",
-      method = "get"
-    },
-    { 
-      path = "oauth", 
-      method = "get"
-    },
-    { 
-      path = "oauth", 
-      method = "put"
-    },
   ]
+
+  lambdas_by_key = {
+    for lambda in local.lambdas: "${lambda.path}_${lambda.method}" => lambda
+  }
 
   roamjs_paths = ["request-path", "oauth"]
   
@@ -187,16 +187,16 @@ resource "aws_api_gateway_resource" "resource" {
 }
 
 resource "aws_lambda_function" "lambda_function" {
-  count    = length(local.lambdas)
+  for_each    = keys(local.lambdas_by_key)
 
-  function_name = "RoamJS_${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}"
+  function_name = "RoamJS_${local.lambdas_by_key[each.value].path}_${lower(local.lambdas_by_key[each.value].method)}"
   role          = aws_iam_role.roamjs_lambda_role.arn
-  handler       = "${local.lambdas[count.index].path}_${lower(local.lambdas[count.index].method)}.handler"
+  handler       = "${local.lambdas_by_key[each.value].path}_${lower(local.lambdas_by_key[each.value].method)}.handler"
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"
   publish       = false
-  timeout       = lookup(local.lambdas[count.index], "timeout", 10)
-  memory_size   = lookup(local.lambdas[count.index], "size", 128)
+  timeout       = lookup(local.lambdas_by_key[each.value], "timeout", 10)
+  memory_size   = lookup(local.lambdas_by_key[each.value], "size", 128)
 
   tags = {
     Application = "Roam JS Extensions"

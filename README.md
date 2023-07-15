@@ -29,6 +29,5 @@ TODO - All endpoints below will be removed or migrated to SamePage.
     "/request-path get",
     "/oauth get",
     "/oauth put",
-    "/token post",
 ]
 ```

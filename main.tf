@@ -154,10 +154,6 @@ locals {
       path = "oauth", 
       method = "put"
     },
-    {
-      path = "token",
-      method = "post"
-    },
   ]
 
   roamjs_paths = ["request-path", "oauth"]

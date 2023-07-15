@@ -125,16 +125,6 @@ locals {
       method = "post"
     },
     {
-      path = "query",
-      method = "post"
-      size = 5120
-      timeout = 120
-    },
-    { 
-      path = "graphs", 
-      method = "post"
-    },
-    {
       path = "article",
       method = "post"
     },
@@ -156,7 +146,7 @@ locals {
     for lambda in local.lambdas: "${lambda.path}_${lambda.method}" => lambda
   }
 
-  roamjs_paths = ["request-path", "oauth"]
+  roamjs_paths = ["oauth"]
   
   resources = distinct([
     for lambda in local.lambdas: lambda.path
@@ -195,8 +185,8 @@ resource "aws_lambda_function" "lambda_function" {
   filename      = data.archive_file.dummy.output_path
   runtime       = "nodejs16.x"
   publish       = false
-  timeout       = lookup(local.lambdas_by_key[each.value], "timeout", 10)
-  memory_size   = lookup(local.lambdas_by_key[each.value], "size", 128)
+  timeout       = 10
+  memory_size   = 128
 
   tags = {
     Application = "Roam JS Extensions"

@@ -22,8 +22,6 @@ TODO - All endpoints below will be removed or migrated to SamePage.
     "/file put",
     "/users get",
     "/error post",
-    "/query post",
-    "/graphs post",
     "/article post",
     "/dropbox-auth post",
     "/postman post",

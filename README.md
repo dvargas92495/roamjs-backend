@@ -8,7 +8,7 @@ TODO - All endpoints below will be removed or migrated to SamePage.
 
 ```js
 [
-    "/auth post",
+    "/auth post", // DONE - awaiting merge of Google/Dropbox/Slack to Roam Depot
     "/user get",
     "/user put",
     "/users post",
@@ -18,7 +18,7 @@ TODO - All endpoints below will be removed or migrated to SamePage.
     "/file put",
     "/users get",
     "/error post",
-    "query post",
+    "/query post",
     "/graphs post",
     "/article post",
     "/dropbox-auth post",
@@ -27,7 +27,7 @@ TODO - All endpoints below will be removed or migrated to SamePage.
     "/google-auth post", // DONE - awaiting merge of Google to Roam Depot
     "/otter post", // DONE - awaiting merge of Otter to Roam Depot
     "/request-path get",
-    "/oauth get",
-    "/oauth put",
+    "/oauth get", // DONE - awaiting merge of Google/Dropbox/Slack to Roam Depot
+    "/oauth put", // DONE - awaiting merge of Google/Dropbox/Slack to Roam Depot
 ]
 ```

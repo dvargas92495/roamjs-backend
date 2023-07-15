@@ -3,13 +3,14 @@ import AWS from "aws-sdk";
 import isAfter from "date-fns/isAfter";
 import addMinutes from "date-fns/addMinutes";
 import { headers } from "./common";
+import samepageRedirect from "./common/samepageRedirect";
 
 const dynamo = new AWS.DynamoDB({
   apiVersion: "2012-08-10",
   region: "us-east-1",
 });
 
-export const handler: APIGatewayProxyHandler = async (event) => {
+export const handler: APIGatewayProxyHandler = async (event, context, cb) => {
   const { service, otp } = JSON.parse(event.body);
   const key = {
     TableName: "RoamJSAuth",
@@ -18,7 +19,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   return dynamo
     .getItem(key)
     .promise()
-    .then((r) => {
+    .then(async (r) => {
       if (r.Item) {
         return dynamo
           .deleteItem(key)
@@ -39,11 +40,12 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             }
           });
       } else {
-        return {
-          statusCode: 204,
-          body: JSON.stringify({}),
-          headers,
-        };
+        const res = await samepageRedirect({ path: "roamjsauth" })(
+          event,
+          context,
+          cb
+        );
+        return res || { statusCode: 204, body: JSON.stringify({}), headers };
       }
     })
     .catch((e) => ({

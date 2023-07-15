@@ -14,7 +14,7 @@ const samepageRedirect =
     headers["Authorization"] = event.headers.Authorization || event.headers.authorization || "";
     headers["Origin"] = event.headers.Origin || event.headers.origin || "";
     return axios
-      .post(`https://api.samepage.network/extensions/${path}`, data, {
+      .post(`https://api.samepage.network/${path}`, data, {
         headers,
       })
       .then((r) => ({

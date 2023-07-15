@@ -204,31 +204,31 @@ resource "aws_lambda_function" "lambda_function" {
 }
 
 resource "aws_api_gateway_method" "method" {
-  count    = length(local.lambdas)
+  count    = toset(keys(local.lambdas_by_key))
 
   rest_api_id   = data.aws_api_gateway_rest_api.rest_api.id
-  resource_id   = aws_api_gateway_resource.resource[local.lambdas[count.index].path].id
-  http_method   = upper(local.lambdas[count.index].method)
+  resource_id   = aws_api_gateway_resource.resource[local.lambdas_by_key[each.value].path].id
+  http_method   = upper(local.lambdas_by_key[each.value].method)
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "integration" {
-  count    = length(local.lambdas)
+  count    = toset(keys(local.lambdas_by_key))
 
   rest_api_id             = data.aws_api_gateway_rest_api.rest_api.id
-  resource_id             = aws_api_gateway_resource.resource[local.lambdas[count.index].path].id
-  http_method             = aws_api_gateway_method.method[count.index].http_method
+  resource_id             = aws_api_gateway_resource.resource[local.lambdas_by_key[each.value].path].id
+  http_method             = aws_api_gateway_method.method[each.value].http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.lambda_function[count.index].invoke_arn
+  uri                     = aws_lambda_function.lambda_function[each.value].invoke_arn
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
-  count    = length(local.lambdas)
+  count    = toset(keys(local.lambdas_by_key))
   
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function[count.index].function_name
+  function_name = aws_lambda_function.lambda_function[each.value].function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${data.aws_api_gateway_rest_api.rest_api.execution_arn}/*/*/*"
 }

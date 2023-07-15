@@ -204,7 +204,7 @@ resource "aws_lambda_function" "lambda_function" {
 }
 
 resource "aws_api_gateway_method" "method" {
-  count    = toset(keys(local.lambdas_by_key))
+  for_each    = toset(keys(local.lambdas_by_key))
 
   rest_api_id   = data.aws_api_gateway_rest_api.rest_api.id
   resource_id   = aws_api_gateway_resource.resource[local.lambdas_by_key[each.value].path].id
@@ -213,7 +213,7 @@ resource "aws_api_gateway_method" "method" {
 }
 
 resource "aws_api_gateway_integration" "integration" {
-  count    = toset(keys(local.lambdas_by_key))
+  for_each    = toset(keys(local.lambdas_by_key))
 
   rest_api_id             = data.aws_api_gateway_rest_api.rest_api.id
   resource_id             = aws_api_gateway_resource.resource[local.lambdas_by_key[each.value].path].id
@@ -224,7 +224,7 @@ resource "aws_api_gateway_integration" "integration" {
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
-  count    = toset(keys(local.lambdas_by_key))
+  for_each    = toset(keys(local.lambdas_by_key))
   
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"

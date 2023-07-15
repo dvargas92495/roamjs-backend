@@ -187,7 +187,7 @@ resource "aws_api_gateway_resource" "resource" {
 }
 
 resource "aws_lambda_function" "lambda_function" {
-  for_each    = to_set(keys(local.lambdas_by_key))
+  for_each    = toset(keys(local.lambdas_by_key))
 
   function_name = "RoamJS_${local.lambdas_by_key[each.value].path}_${lower(local.lambdas_by_key[each.value].method)}"
   role          = aws_iam_role.roamjs_lambda_role.arn

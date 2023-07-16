@@ -15,13 +15,6 @@ TODO - All endpoints below will be removed or migrated to SamePage.
     "/otter post", // DONE - awaiting merge of Otter to Roam Depot
     "/user get",
     "/user put",
-    "/users post",
-    "/check get",
-    "/user post",
-    "/file get",
-    "/file put",
-    "/users get",
-    "/error post",
     "/article post",
     "/dropbox-auth post",
     "/postman post",

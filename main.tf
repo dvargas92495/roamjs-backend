@@ -97,34 +97,6 @@ locals {
       method = "put"
     },
     {
-      path = "users",
-      method = "post"
-    },
-    {
-      path = "check",
-      method = "get"
-    },
-    {
-      path = "user",
-      method = "post"
-    },
-    {
-      path = "file",
-      method = "get"
-    },
-    {
-      path = "file",
-      method = "put"
-    },
-    {
-      path = "users",
-      method = "get"
-    },
-    { 
-      path = "error", 
-      method = "post"
-    },
-    {
       path = "article",
       method = "post"
     },

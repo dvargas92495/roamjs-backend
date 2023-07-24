@@ -5,18 +5,27 @@ const samepageRedirect =
   ({
     path,
     headers = {},
+    method = "post",
   }: {
     path: string;
     headers?: Record<string, string>;
+    method?: "post" | "get" | "put";
   }): APIGatewayProxyHandler =>
   async (event) => {
-    const data = JSON.parse(event.body || "{}");
-    headers["Authorization"] = event.headers.Authorization || event.headers.authorization || "";
+    headers["Authorization"] =
+      event.headers.Authorization || event.headers.authorization || "";
     headers["Origin"] = event.headers.Origin || event.headers.origin || "";
-    return axios
-      .post(`https://api.samepage.network/${path}`, data, {
-        headers,
-      })
+    const base = `https://api.samepage.network/${path}`;
+    const args =
+      method === "get"
+        ? ([
+            `${base}?${new URLSearchParams(
+              event.queryStringParameters
+            ).toString()}`,
+            { headers },
+          ] as const)
+        : ([base, JSON.parse(event.body || "{}"), { headers }] as const);
+    return axios[method](args[0], args[1], args[2])
       .then((r) => ({
         statusCode: 200,
         body: JSON.stringify(r.data),

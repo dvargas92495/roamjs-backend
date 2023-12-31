@@ -85,10 +85,6 @@ locals {
       method = "post"
     },
     {
-      path = "otter",
-      method = "post"
-    },
-    {
       path = "user",
       method = "get"
     },
